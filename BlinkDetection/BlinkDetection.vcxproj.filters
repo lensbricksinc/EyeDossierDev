@@ -25,6 +25,12 @@
     <ClCompile Include="utilityFuncs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="blinkStats.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="statsMotion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blineME.h">
@@ -43,6 +49,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="utilityFuncs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="blinkStats.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="statsMotion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,7 +2,6 @@
 #include "utilityFuncs.h"
 #include "motionEstDS.h"
 
-#define BLOCK_SIZE 8
 
 BlinkDetector::BlinkDetector()
 {
@@ -12,17 +11,37 @@ BlinkDetector::BlinkDetector()
 
 BlinkDetector::~BlinkDetector()
 {
+    if (blinkStats != NULL)
+    {
+        delete blinkStats;
+        blinkStats = NULL;
+    }
+        
     if (prevFrameInfo != NULL)
+    {
         prevFrameInfo->frame = NULL;    // Is this required for dereferencing??
         delete prevFrameInfo;
+        prevFrameInfo = nullptr;
+    }
 
     if (currFrameInfo != NULL)
+    {
         currFrameInfo->frame = NULL;
         delete currFrameInfo;
+        currFrameInfo = nullptr;
+    }
 
     if (faceArray != NULL)
+    {
         delete[] faceArray;
+        faceArray = nullptr;
+    }
 
+    if (motionStats != NULL)
+    {
+        delete[] motionStats;
+        motionStats = nullptr;
+    }
     return;
 }
 
@@ -34,29 +53,41 @@ BlinkDetector::BlinkDetector(cv::string face_cascade_file)
     currBaseSizeBox = cv::Rect(-1,-1,0,0);
     countNoFace = 0;
     FrameNum= 0;
+    prevFaceBox = cv::Rect(-1,-1,-1,-1);
 
     face_cascade_name = face_cascade_file;
-    if (!face_cascade.load(face_cascade_name))
+    
+    faceArray = new FaceTrackingInfo[5];
+    isReset = false;
+    motionStats = new MotionRegionOnSAD();
+    resetBlinkStates();
+
+    blinkStats = new BLINK_STATS();
+	if (!face_cascade.load(face_cascade_name))
     {
         printf("Unable to load face cascade");
         return;
     };
-    faceArray = new FaceTrackingInfo[5];
 }
 
 
-cv::Mat BlinkDetector::blink_detect( cv::Mat frame)
+BlinkDetectorReturnType BlinkDetector::blink_detect(cv::Mat frame)
 {
+    BlinkDetectorReturnType ret;
+
     if (prevFrameInfo != NULL)
     {
         prevFrameInfo->frame = NULL;
         delete prevFrameInfo;
+        prevFrameInfo = nullptr;
     }
 
     if (currFrameInfo != NULL)
         prevFrameInfo = currFrameInfo;
 
     FrameNum++;
+    
+    /*
     cv::String sFrameNum;
     sFrameNum = std::to_string(FrameNum);
 
@@ -67,8 +98,9 @@ cv::Mat BlinkDetector::blink_detect( cv::Mat frame)
     else if (sFrameNum.size() == 3)
         sFrameNum = "0" + sFrameNum;
 
-    //cv::string fileName = "frame_dump\\frame_" + sFrameNum + ".png";
-    //cv::imwrite(fileName, frame);
+    cv::string fileName = "frame_dump\\frame_" + sFrameNum + ".png";
+    cv::imwrite(fileName, frame);
+    */
     
 
     currFrameInfo = new FrameInfo();
@@ -112,31 +144,60 @@ cv::Mat BlinkDetector::blink_detect( cv::Mat frame)
     //-- Detect faces
     face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );
 
+    updateFaceSizeForBlockProc(faces);
     currFace = postProcessFaces(faces);
 
     if (currFace.width != -1)
     {
         currFrameInfo->faceDetected = true;
         currFrameInfo->faceRegion = currFace;
-
-        // Draw rectangle only for largest face
-        cv::Point lefttop(currFace.x, currFace.y);
-        cv::Point rightbottom( (currFace.x + currFace.width), (currFace.y + currFace.height));
-        cv::rectangle(frame, lefttop, rightbottom, cv::Scalar( 255, 0, 255 ));
     }
 
     cv::Rect roi = fObtainRoiUnion();
 
+    bool faceBoxChanged = hasFaceBoxChanged(roi);
+
+    ret.outState = OUTSTATE_BLINKDETECT_FRAME_IDLE;
+    ret.faceBox = cv::Rect(-1, -1, -1, -1);
     if (roi.width > 0)
     {
-        StateMachine(roi);
+        if (faceBoxChanged == false)
+        {
+            int state = -1;
+            state = StateMachine(roi);
+            if (state == 1)
+            {
+                ret.outState = OUTSTATE_BLINKDETECT_FRAME_BLINK;
+                blinkStats->addEvent(BLINK_STATS::BLINK_STATS_EVENT::EVENT_BLINK_EYEBLINK);
+            }
+            else
+            {
+                ret.outState = OUTSTATE_BLINKDETECT_FRAME_NOBLINK;
+                blinkStats->addEvent(BLINK_STATS::BLINK_STATS_EVENT::EVENT_BLINK_ANALYSING);
+            }
+        }
+        else
+        {
+            resetBlinkStates();
+            ret.outState = OUTSTATE_BLINKDETECT_FRAME_IN_RESET;
+            
+        }
+
+        ret.faceBox = roi;
+        /*
+        // Draw rectangle only if processing is happening
+        cv::Point lefttop(roi.x, roi.y);
+        cv::Point rightbottom( (roi.x + roi.width), (roi.y + roi.height));
+        cv::rectangle(frame, lefttop, rightbottom, cv::Scalar( 255, 0, 0 ));
+        */
     }
     else
     {
-        resetBlinkStates();
+        blinkStats->addEvent(BLINK_STATS::BLINK_STATS_EVENT::EVENT_BLINK_NODATA);
     }
+    ret.frame = frame;
 
-    return frame;
+    return ret;
 }
 
 
@@ -180,27 +241,6 @@ int BlinkDetector::doMotionEstimation(cv::Mat newFrame, cv::Mat oldFrame, cv::Re
     cv::Scalar meanCurrImage = cv::mean(channelsCurrImage[0]);
     cv::Scalar meanRefImage = cv::mean(channelsRefImage[0]);
 
-    cv::Mat thres_img;
-    double high_thres = cv::threshold( channelsRefImage[0], thres_img, 0, 255, CV_THRESH_BINARY+CV_THRESH_OTSU );
-
-    /// Reduce noise with a kernel 3x3
-    cv::Mat detected_edges;
-    cv::blur( channelsRefImage[0], detected_edges, cv::Size(3,3) );
-
-    int lowThreshold = (int)(high_thres/2);
-    int ratio= 3;
-    int kernel_size = 3;
-    cv::Mat dst;
-    /// Canny detector
-    cv::Canny( detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size );
-
-    /// Using Canny's output as a mask, we display our result
-    dst = cv::Scalar::all(0);
-
-    channelsCurrImage[0].copyTo( dst, detected_edges);
-    //cv::imshow( "Canny Edges" , dst );
-    //cv::waitKey(0);
-
     //Implementing cv::Mat A = channelsCurrImage[0] - meanCurrImage[0,0]; 
     cv::Mat srcMat = channelsCurrImage[0];
     cv::Mat A = cv::Mat(srcMat.rows,srcMat.cols,CV_32F);
@@ -233,92 +273,62 @@ int BlinkDetector::doMotionEstimation(cv::Mat newFrame, cv::Mat oldFrame, cv::Re
      
     double DScomputations;
     motionEstDS(A, B, BLOCK_SIZE, 2*BLOCK_SIZE, motionVect, DScomputations);
-
-    if (Index == 0)
-    {
-        double variance1;
-        double variance2;
-
-        cv::Scalar sum1 = cv::sum(channelsCurrImage[0]);
-        variance1 = ((double)sum1.val[0,0])/(double)(numBlocks*BLOCK_SIZE*BLOCK_SIZE);
-
-        cv::Mat Aabs = cv::abs(A);
-        cv::Scalar sum2 = cv::sum(Aabs);
-        variance2 = (double)sum2.val[0,0]/(double)(numBlocks*BLOCK_SIZE*BLOCK_SIZE);
-
-        if ((variance1 < 80) && (variance2 < 20))
-            thres1 = 2;
-        else
-            thres1 = 3;
-    }
-   thres1= 4;
-
-    /*
-    cv::imshow("oldFrame", oldFrame);
-    cv::waitKey(1);
-    cv::imshow("newFrame", oldFrame);
-    cv::waitKey(1);
-    */
-    /*
-    if (Index == 1)
-    {
-    cv::imwrite("C:\\Users\\Kumar\\Desktop\\oldFrame.png", oldFrame);
-    cv::imwrite("C:\\Users\\Kumar\\Desktop\\newFrame.png", newFrame);
-    }
-    */
-
     
-    int localCount=0;
-    for (int i=2; i< (int)((row+1)/2 - 2); i++)
+    int *motionMask = new int[lenVectors];
+
+    motionStats->updateStats(motionVect, lenVectors, 4, motionMask, Index);
+    
+    int localCount = 0;
+    for (int i = 2; i <= ((row+1) / 2 - 2); i++)
     {
-        for (int j= 2; j<=row-2; j++)
+        for (int j = 2; j <= row - 2; j++)
         {
-            if (motionVect[2][i*row+j] > thres1)
-            {
-                 localCount = localCount+1;
-            }
+            int ind = i*row + j - 1;
+            if (motionMask[ind] == 1)
+                localCount++;
         }
     }
 
+    delete[] motionMask;
+    motionMask = nullptr;
+
     for (int i=0; i<4; i++)
+    {
         delete[] motionVect[i];
-         
-    //free(motionVect);
-    
+        motionVect[i] = nullptr;
+    }
+
     return localCount;
 
 }
 
-void BlinkDetector::StateMachine(cv::Rect faceRegion)
+int BlinkDetector::StateMachine(cv::Rect faceRegion)
 {
+    isReset = false;
+    int hasBlink=0;
+
+    /*
+    faceRegion.x = 289;
+    faceRegion.y = 175;
+    faceRegion.width = 208;
+    faceRegion.height = 208;
+    */
     int row = faceRegion.width/BLOCK_SIZE;
     int numBlocks = row*row;
     int minEyeBlocks;
-    minEyeBlocks = (int)((float)(10*numBlocks/800) + 0.5);
-    int minEyeBlocks1 = minEyeBlocks;
-    if (minEyeBlocks < 10)
-        minEyeBlocks = 10;
+    minEyeBlocks = (int)(faceRegion.width/10);
     int prevcount1;
     double thres1;
     
+    count1 = doMotionEstimation(currFrameInfo->frame, prevFrameInfo->frame, faceRegion, blinkState, thres1);
+    //printf("blinkState= %d, count1= %d . FrameNum= %d\n",blinkState, count1, FrameNum);
 
-    count1 = doMotionEstimation(currFrameInfo->frame, prevFrameInfo->frame, faceRegion,0, thres1);
-    printf("blinkState= %d, count1= %d . FrameNum= %d\n",blinkState, count1, FrameNum);
-    /*
-    if (refStartFrame.data != NULL)
-    {
-        
-        cv::String fileName = "C:\\Users\\Kumar\\Desktop\\frame"+ std::to_string(FrameNum)+".png";
-        cv::imwrite(fileName, refStartFrame);
-    }
-    */
     switch (blinkState)
     {
             case 0:
-                if ((count1 > minEyeBlocks1) || (count1 + prevCount >= (2*minEyeBlocks)) )
+                if (count1 > minEyeBlocks) 
                 {
-                    blinkState = 1;
-                    //prevCount  = (prevCount + count1)/4;
+                    blinkState = 4;
                     if (count1 > minEyeBlocks)
                         prevCount  = count1;
                     
@@ -334,64 +344,25 @@ void BlinkDetector::StateMachine(cv::Rect faceRegion)
                 }
                 break;
 
-            case 1:
-                framesInCurrState = framesInCurrState + 1;
-                if ((count1 < (prevCount+1)) && (abs(prevCount-count1) >= minEyeBlocks))
-                {
-                    blinkState = 3;
-                    framesInCurrState = 0;
-                    prevCount = count1;
-                }
-                else
-                {
-                    if (count1 > minEyeBlocks)
-                    {
-                        prevCount  = count1;
-                        framesInCurrState = 0;
-                    }
-                    if (framesInCurrState > 2)
-                    {
-                        if (count1 > minEyeBlocks)
-                            blinkState = 1;
-                        else
-                            blinkState = 0;
-                    }
-                }
-                break;
-
-            case 3:
-                framesInCurrState = framesInCurrState + 1;
-                if (count1 + prevCount>= (minEyeBlocks))
-                {
-                    //eye open starts
-                    blinkState = 4;
-                    framesInCurrState = 0;
-                }
-                else
-                {
-                    prevCount = count1;
-                    if (framesInCurrState > 2)
-                   {
-                        blinkState = 0;
-                        prevCount = 0;
-                    }
-                }
-                break;
-
             case 4:
             {
                 framesInCurrState = framesInCurrState+1;
                 prevcount1 = count1;
                 //%do motion estimation
-                count1 = doMotionEstimation(currFrameInfo->frame, refStartFrame, faceRegion,1, thres1);
-                printf("blinkState= %d, count1= %d . minEyeBlocks= %d\n",blinkState, count1, minEyeBlocks);
-                if ((count1 <= 5*minEyeBlocks && prevcount1 <= (prevCount+1)) || count1 <= minEyeBlocks)
+                count1 = doMotionEstimation(currFrameInfo->frame, refStartFrame, faceRegion, blinkState, thres1);
+                //printf("blinkState= %d, count1= %d . minEyeBlocks= %d\n",blinkState, count1, minEyeBlocks);
+                if (count1 <= minEyeBlocks)
                 {
-                    printf("***********BLINK DETECTED************");
-                    blinkState = 1;
+                    //printf( "***********BLINK DETECTED************\n" );
+                    hasBlink = 1;
+                    blinkState = 0;
+                }
+                else if (count1 > 3 * minEyeBlocks)
+                {
+                    blinkState = 0;
                 }
 
-                if (blinkState == 4 && framesInCurrState > 3)
+                if (blinkState == 4 && framesInCurrState > 7)
                 {
                     blinkState = 0;
                 }
@@ -401,12 +372,23 @@ void BlinkDetector::StateMachine(cv::Rect faceRegion)
 
     }
 
+    return hasBlink;
 }
 
 
 cv::Rect BlinkDetector::fObtainRoiUnion()
 {
     cv::Rect rectangle(-1,-1,0,0);
+    if (prevFrameInfo != NULL 
+        && currFrameInfo != NULL
+        && prevFrameInfo->faceDetected == true 
+        && currFrameInfo->faceDetected == true)
+    {
+        rectangle = currFrameInfo->faceRegion;
+    }
+
+/*
+   
     if (prevFrameInfo != NULL 
         && currFrameInfo != NULL
         && prevFrameInfo->faceDetected == true 
@@ -442,6 +424,7 @@ cv::Rect BlinkDetector::fObtainRoiUnion()
         rectangle.width = rectangle.width -extra;
         rectangle.height = rectangle.height -extra;
     }
+    */
 
     /*
     // Post process the roi to ensure a consistent face width across frames
@@ -474,11 +457,33 @@ cv::Rect BlinkDetector::fObtainRoiUnion()
 
 void BlinkDetector::resetBlinkStates()
 {
-    count= 0;
-    blinkState= 0;
-    count1= 0;
-    prevCount= 0;
-    framesInCurrState= 0;
-    //prevFrame;    // Needs to be initialised
-    refStartFrame = NULL;
+    if (isReset == false)
+    {
+        prevFaceBox = cv::Rect(-1, -1, -1, -1);
+        motionStats->resetMotionStats();
+        count= 0;
+        blinkState= 0;
+        count1= 0;
+        prevCount= 0;
+        framesInCurrState= 0;
+        //prevFrame;    // Needs to be initialised
+        refStartFrame = NULL;
+        isReset = true;
+        printf("\n++++++++++++++\n++++++++++++++\nSTATE MACHINE RESET\n++++++++++++++\n++++++++++++++\n");
+    }
 }
+
+
+bool BlinkDetector::hasFaceBoxChanged(cv::Rect roi)
+{
+    bool val = false;
+    if (roi.width == prevFaceBox.width && roi.height == prevFaceBox.height
+        && roi.x == prevFaceBox.x && roi.y == prevFaceBox.y)
+        val =  false;
+    else
+        val = true;
+    prevFaceBox = roi;
+
+    return val;
+};
+

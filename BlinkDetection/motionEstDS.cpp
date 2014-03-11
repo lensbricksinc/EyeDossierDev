@@ -602,7 +602,9 @@ void motionEstDS(cv::Mat imgP, cv::Mat imgI, int mbSize, int p, double *motionVe
     }
 
     delete[] costs2;
-    delete costs;
+    costs2 = nullptr;
+    delete[] costs;
+    costs = nullptr;
 
     DScomputations = computations/(mbCount - 1);
 }

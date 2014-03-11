@@ -3,17 +3,18 @@
 
 #include <opencv2\opencv.hpp>
 #include "FrameInfo.h"
-
+#include "statsMotion.h"
+#include "blinkStats.h"
 
 #if 1
-#define FD_PERSISTENCE 100
+#define FD_PERSISTENCE 50
 #define FD_VALIDATION_COUNT 10
 #else
 #define FD_PERSISTENCE 5
 #define FD_VALIDATION_COUNT 3
 #endif
 
-// Even if the face is not visible for 5 frames, we do not remove the face box
+#define BLOCK_SIZE 8
 
 
 
@@ -51,10 +52,11 @@ public:
     ~BlinkDetector();
     
     BlinkDetector(cv::string face_cascade_file);
-    cv::Mat blink_detect( cv::Mat frame);
+    struct BlinkDetectorReturnType blink_detect(cv::Mat frame);
     
 
 private:
+	bool hasFaceBoxChanged(cv::Rect roi);
 	int resetUpdateStateFaceArray();
 	int updateFaceSizeForBlockProc(cv::vector<cv::Rect>& faces);
     void resetBlinkStates();
@@ -64,7 +66,7 @@ private:
     int addToInternalFaceArray(cv::Rect currFace);
 	void updateExistingFaceArray();
     cv::Rect getBestFaceFrmInternalArray();
-	void StateMachine(cv::Rect faceRegion);
+	int StateMachine(cv::Rect faceRegion);
     int doMotionEstimation(cv::Mat newFrame, cv::Mat oldFrame, cv::Rect faceRegion, int Index, double &thres1);
 
     cv::CascadeClassifier face_cascade;
@@ -83,9 +85,29 @@ private:
     int framesInCurrState;
     cv::Mat prevFrame;    // Needs to be initialised
     cv::Mat refStartFrame;
+	cv::Rect prevFaceBox;
+	bool isReset;
+	MotionRegionOnSAD *motionStats;
+
+    BLINK_STATS *blinkStats;
+
+public:
+    enum OutputState
+    {
+        OUTSTATE_BLINKDETECT_FRAME_IDLE= 0,
+        OUTSTATE_BLINKDETECT_FRAME_NOBLINK= 1,
+        OUTSTATE_BLINKDETECT_FRAME_BLINK= 2,
+        OUTSTATE_BLINKDETECT_FRAME_IN_RESET = 3
+    };
+
 };
 
 
+typedef struct BlinkDetectorReturnType {
+    cv::Mat frame;
+    BlinkDetector::OutputState outState;
+    cv::Rect faceBox;
+}BlinkDetectorReturnType;
 
 
 #endif

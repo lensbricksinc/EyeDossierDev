@@ -299,7 +299,10 @@ void blineME (cv::String rootDir)
 
             
             for (int i=0; i<4; i++)
+            {
                 delete[] motionVect[i];
+                motionVect[i] = nullptr;
+            }
             
 
             //free(motionVect);
@@ -449,7 +452,10 @@ void blineME (cv::String rootDir)
 
                 
                 for (int i=0; i<4; i++)
+                {
                     delete[] motionVect[i];
+                    motionVect[i] = nullptr;
+                }
 
                 //free(motionVect);
                 

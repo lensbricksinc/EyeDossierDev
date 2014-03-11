@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="blinkStats.cpp" />
     <ClCompile Include="getFileNames.cpp" />
     <ClCompile Include="motionEstDS.cpp" />
     <ClCompile Include="blineME.cpp" />
@@ -152,14 +153,17 @@
     <ClCompile Include="face_postprocessing.cpp" />
     <ClCompile Include="FrameInfo.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="statsMotion.cpp" />
     <ClCompile Include="utilityFuncs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blineME.h" />
+    <ClInclude Include="blinkStats.h" />
     <ClInclude Include="blink_detector.h" />
     <ClInclude Include="FrameInfo.h" />
     <ClInclude Include="getFileNames.h" />
     <ClInclude Include="motionEstDS.h" />
+    <ClInclude Include="statsMotion.h" />
     <ClInclude Include="utilityFuncs.h" />
   </ItemGroup>
   <ItemGroup>
