@@ -23,6 +23,7 @@ struct FaceTrackingInfo
     int reqValidationCount;
     int remPersistenceCount;
     cv::Rect FaceDim;
+	bool IsUpdated;
 
     FaceTrackingInfo() {
         isValid = false;
@@ -54,12 +55,14 @@ public:
     
 
 private:
+	int resetUpdateStateFaceArray();
+	int updateFaceSizeForBlockProc(cv::vector<cv::Rect>& faces);
     void resetBlinkStates();
     cv::Rect fObtainRoiUnion();
     bool fHasMotion(cv::Rect roi);
     cv::Rect postProcessFaces(cv::vector<cv::Rect>& faces);
     int addToInternalFaceArray(cv::Rect currFace);
-	void updateExistingFaceArray(int index);
+	void updateExistingFaceArray();
     cv::Rect getBestFaceFrmInternalArray();
 	void StateMachine(cv::Rect faceRegion);
     int doMotionEstimation(cv::Mat newFrame, cv::Mat oldFrame, cv::Rect faceRegion, int Index, double &thres1);

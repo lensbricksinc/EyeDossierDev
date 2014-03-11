@@ -10,7 +10,8 @@ int BlinkDetector::addToInternalFaceArray(cv::Rect currFace)
         FaceTrackingInfo *faceEntry = &faceArray[i];
         if (faceEntry->isValid)
         {
-            int deltaX = (faceEntry->FaceDim.width*4)/5;
+            //int deltaX = (faceEntry->FaceDim.width*4)/5;
+            int deltaX = (faceEntry->FaceDim.width * 1) / 8;
             if( abs(faceEntry->FaceDim.x - currFace.x)<deltaX
                 && abs(faceEntry->FaceDim.y - currFace.y)<deltaX
                 && abs(faceEntry->FaceDim.width - currFace.width)<20)
@@ -29,7 +30,9 @@ int BlinkDetector::addToInternalFaceArray(cv::Rect currFace)
         if (faceEntry->reqValidationCount >0)
             faceEntry->reqValidationCount--;
 
-        faceEntry->FaceDim = currFace;
+        faceEntry->IsUpdated = true;
+        // Temporarily sustaining a face until it is available ...
+        //faceEntry->FaceDim = currFace;
     }
     else
     {
@@ -43,6 +46,7 @@ int BlinkDetector::addToInternalFaceArray(cv::Rect currFace)
                 faceEntry->reqValidationCount= FD_VALIDATION_COUNT;
                 faceEntry->remPersistenceCount= FD_PERSISTENCE;
                 faceEntry->FaceDim = currFace;
+                faceEntry->IsUpdated = true;
                 index = j;
                 break;
             }
@@ -57,30 +61,28 @@ int BlinkDetector::addToInternalFaceArray(cv::Rect currFace)
 
 
 
-void BlinkDetector::updateExistingFaceArray(int index)
+void BlinkDetector::updateExistingFaceArray()
 {
     // If i != index, update reqValidationCount, persistanceCount accordingly
     for (int i=0; i<5; i++)
     {
-        if (i!= index) {
-            FaceTrackingInfo *faceEntry = &faceArray[i];
+        FaceTrackingInfo *faceEntry = &faceArray[i];
 
-            if (!faceEntry->isValid)
-                continue;
+        if (!faceEntry->isValid || faceEntry->IsUpdated == true)
+            continue;
 
-            if (faceEntry->reqValidationCount !=0)
-            {
-                faceEntry->reqValidationCount = FD_VALIDATION_COUNT;
-                faceEntry->reset();
-                continue;
-            }
-
-            if (faceEntry->remPersistenceCount >0)
-                faceEntry->remPersistenceCount --;
-
-            if (faceEntry->remPersistenceCount == 0)
-                faceEntry->reset();
+        if (faceEntry->reqValidationCount !=0)
+        {
+            faceEntry->reqValidationCount = FD_VALIDATION_COUNT;
+            faceEntry->reset();
+            continue;
         }
+
+        if (faceEntry->remPersistenceCount >0)
+            faceEntry->remPersistenceCount --;
+
+        if (faceEntry->remPersistenceCount == 0)
+            faceEntry->reset();
 
     }
     return;
@@ -127,17 +129,46 @@ cv::Rect BlinkDetector::getBestFaceFrmInternalArray()
 cv::Rect BlinkDetector::postProcessFaces(cv::vector<cv::Rect>& faces)
 {
     cv::Rect outFace;
-    int index = -1;
+    resetUpdateStateFaceArray();
     for (int i=0; i<faces.size(); i++)
     {
         // Face validation and persistence
-        index = addToInternalFaceArray(faces[i]);
+        addToInternalFaceArray(faces[i]);
     }
-    updateExistingFaceArray(index);
+    updateExistingFaceArray();
     
     // Display face depending upon internal Face Array
     outFace = getBestFaceFrmInternalArray();
 
-
     return outFace;
 }
+
+
+int BlinkDetector::updateFaceSizeForBlockProc(cv::vector<cv::Rect>& faces)
+{
+    for (int i=0; i<faces.size(); i++)
+    {
+        int faceRem = faces[i].width % BLOCK_SIZE;
+        int extraReq =  (faceRem == 0)?0:(BLOCK_SIZE-faceRem);
+        faces[i].x -= extraReq/2;
+        faces[i].y -= extraReq/2;
+        faces[i].width += extraReq;
+        faces[i].height += extraReq;
+    }
+
+    return 0;
+}
+
+int BlinkDetector::resetUpdateStateFaceArray()
+{
+    for (int i=0; i<5; i++)
+    {
+        FaceTrackingInfo *faceEntry = &faceArray[i];
+        if (faceEntry->isValid == true)
+            faceEntry->IsUpdated = false;
+    }
+
+    return 0;
+}
+
+
