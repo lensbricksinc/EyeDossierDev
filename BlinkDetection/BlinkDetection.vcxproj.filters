@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="blineME.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="blink_detector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="face_postprocessing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="getFileNames.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="motionEstDS.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utilityFuncs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="blineME.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="blink_detector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="getFileNames.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="motionEstDS.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utilityFuncs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="cascades\haarcascade_frontalface_alt.xml">
+      <Filter>cascades</Filter>
+    </Xml>
+    <Xml Include="cascades\haarcascade_frontalface_alt2.xml">
+      <Filter>cascades</Filter>
+    </Xml>
+    <Xml Include="cascades\haarcascade_frontalface_alt_tree.xml">
+      <Filter>cascades</Filter>
+    </Xml>
+    <Xml Include="cascades\haarcascade_frontalface_default.xml">
+      <Filter>cascades</Filter>
+    </Xml>
+    <Xml Include="cascades\lbpcascade_frontalface.xml">
+      <Filter>cascades</Filter>
+    </Xml>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="cascades">
+      <UniqueIdentifier>{831ab2a3-cb0c-4ac9-8510-4551c4386461}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{56b78cfa-a3fb-4035-aefd-b1811fa28391}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{cc0c66d2-f9da-4aa7-ba25-e186bcea85e9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
