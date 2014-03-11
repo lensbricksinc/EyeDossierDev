@@ -140,7 +140,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(OPENCV_ROOT_WIN)\build\x64\vc12\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OPENCV_ROOT_WIN)\build\x64\vc11\lib</AdditionalLibraryDirectories>
       <AdditionalDependencies>opencv_core248.lib;opencv_features2d248.lib;opencv_flann248.lib;opencv_highgui248.lib;opencv_imgproc248.lib;opencv_objdetect248.lib;opencv_video248.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

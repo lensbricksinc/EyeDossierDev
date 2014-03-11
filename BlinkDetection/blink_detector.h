@@ -67,7 +67,7 @@ private:
 	void updateExistingFaceArray();
     cv::Rect getBestFaceFrmInternalArray();
 	int StateMachine(cv::Rect faceRegion);
-    int doMotionEstimation(cv::Mat newFrame, cv::Mat oldFrame, cv::Rect faceRegion, int Index, double &thres1);
+    int doMotionEstimation(cv::Mat newFrame, cv::Mat oldFrame, cv::Rect faceRegion, int Index, double &thres1, double minEyeBlocks, int &motion);
 
     cv::CascadeClassifier face_cascade;
     FrameInfo *prevFrameInfo;
@@ -81,7 +81,9 @@ private:
     int count;
     int blinkState;
     int count1;
-    int prevCount;
+    int prevCount,prevcount1;
+	int maxCount;
+	int prevMotion;
     int framesInCurrState;
     cv::Mat prevFrame;    // Needs to be initialised
     cv::Mat refStartFrame;

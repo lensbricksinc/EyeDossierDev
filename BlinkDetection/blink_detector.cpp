@@ -87,7 +87,7 @@ BlinkDetectorReturnType BlinkDetector::blink_detect(cv::Mat frame)
 
     FrameNum++;
     
-    /*
+#if 0
     cv::String sFrameNum;
     sFrameNum = std::to_string(FrameNum);
 
@@ -100,7 +100,7 @@ BlinkDetectorReturnType BlinkDetector::blink_detect(cv::Mat frame)
 
     cv::string fileName = "frame_dump\\frame_" + sFrameNum + ".png";
     cv::imwrite(fileName, frame);
-    */
+#endif
     
 
     currFrameInfo = new FrameInfo();
@@ -215,7 +215,7 @@ bool BlinkDetector::fHasMotion(cv::Rect roi)
 }
 
 
-int BlinkDetector::doMotionEstimation(cv::Mat newFrame, cv::Mat oldFrame, cv::Rect faceRegion, int Index, double &thres1)
+int BlinkDetector::doMotionEstimation(cv::Mat newFrame, cv::Mat oldFrame, cv::Rect faceRegion, int Index, double &thres1,double minEyeBlocks, int &motion)
 {
     int row = faceRegion.width/BLOCK_SIZE;
     int numBlocks = row*row;
@@ -268,15 +268,22 @@ int BlinkDetector::doMotionEstimation(cv::Mat newFrame, cv::Mat oldFrame, cv::Re
     int imgRows = A.rows;
     int imgCols = A.cols;
     int lenVectors = imgRows*imgCols/((BLOCK_SIZE*BLOCK_SIZE));
+	int **mask = new int*[imgRows];
+	
+	for (int i = 0; i < imgRows; i++)
+	{
+		mask[i] = new int[imgCols] ();
+	}
+
     for (int i=0; i<4; i++)
         motionVect[i] = new double[lenVectors];
      
     double DScomputations;
     motionEstDS(A, B, BLOCK_SIZE, 2*BLOCK_SIZE, motionVect, DScomputations);
     
-    int *motionMask = new int[lenVectors];
+    int *motionMask = new int[lenVectors]();
 
-    motionStats->updateStats(motionVect, lenVectors, 4, motionMask, Index);
+    motionStats->updateStats(motionVect, lenVectors, 1.9, motionMask, Index);
     
     int localCount = 0;
     for (int i = 2; i <= ((row+1) / 2 - 2); i++)
@@ -284,11 +291,15 @@ int BlinkDetector::doMotionEstimation(cv::Mat newFrame, cv::Mat oldFrame, cv::Re
         for (int j = 2; j <= row - 2; j++)
         {
             int ind = i*row + j - 1;
-            if (motionMask[ind] == 1)
-                localCount++;
+			if (motionMask[ind] == 1)
+			{
+				mask[i][j] = 255;
+				localCount++;
+			}
         }
     }
-
+	motion = motionStats->analyzeMotion(mask,row,minEyeBlocks,localCount,blinkState,row,row);
+	
     delete[] motionMask;
     motionMask = nullptr;
 
@@ -297,7 +308,11 @@ int BlinkDetector::doMotionEstimation(cv::Mat newFrame, cv::Mat oldFrame, cv::Re
         delete[] motionVect[i];
         motionVect[i] = nullptr;
     }
-
+	for (int i = 0; i < imgRows; i++)
+	{
+		delete[] mask[i]; 
+	}
+	delete[] mask;
     return localCount;
 
 }
@@ -315,29 +330,36 @@ int BlinkDetector::StateMachine(cv::Rect faceRegion)
     */
     int row = faceRegion.width/BLOCK_SIZE;
     int numBlocks = row*row;
-    int minEyeBlocks;
-    minEyeBlocks = (int)(faceRegion.width/10);
-    int prevcount1;
+    double minEyeBlocks,minEyeBlocks1;
+    minEyeBlocks = (double)(faceRegion.width*faceRegion.width*5/(100*100));
     double thres1;
-    
-    count1 = doMotionEstimation(currFrameInfo->frame, prevFrameInfo->frame, faceRegion, blinkState, thres1);
-    //printf("blinkState= %d, count1= %d . FrameNum= %d\n",blinkState, count1, FrameNum);
-
+	int motion;
+	minEyeBlocks1 = (double)((7*minEyeBlocks)/10);
+	if (blinkState == 0)
+	{
+		
+		count1 = doMotionEstimation(currFrameInfo->frame, prevFrameInfo->frame, faceRegion, blinkState, thres1, minEyeBlocks, motion);
+		printf("blinkState= %d, count1= %d . FrameNum= %d motion = %d minEyeBlocks %lf \n", blinkState, count1, FrameNum, motion, minEyeBlocks);
+	}
     switch (blinkState)
     {
             case 0:
-                if (count1 > minEyeBlocks) 
-                {
-                    blinkState = 4;
-                    if (count1 > minEyeBlocks)
-                        prevCount  = count1;
-                    
-                    if (prevCount < 2)
-                        prevCount = 2;
-
-                    framesInCurrState = 0;
-                    refStartFrame= prevFrameInfo->frame.clone();
-                }
+				if (count1 > minEyeBlocks1 && count1 < 3*minEyeBlocks)
+				{
+					if (motion == 1)
+					{
+						prevMotion = 1;
+						blinkState = 4;
+						prevCount = count1;
+						framesInCurrState = 0;
+						refStartFrame = prevFrameInfo->frame.clone();
+						maxCount = prevCount;
+					}
+					else
+					{
+						prevCount = count1;
+					}
+				}
                 else
                 {
                     prevCount = count1;
@@ -349,27 +371,43 @@ int BlinkDetector::StateMachine(cv::Rect faceRegion)
                 framesInCurrState = framesInCurrState+1;
                 prevcount1 = count1;
                 //%do motion estimation
-                count1 = doMotionEstimation(currFrameInfo->frame, refStartFrame, faceRegion, blinkState, thres1);
-                //printf("blinkState= %d, count1= %d . minEyeBlocks= %d\n",blinkState, count1, minEyeBlocks);
-                if (count1 <= minEyeBlocks)
-                {
-                    //printf( "***********BLINK DETECTED************\n" );
+                count1 = doMotionEstimation(currFrameInfo->frame, refStartFrame, faceRegion, blinkState, thres1,minEyeBlocks, motion);
+                printf("blinkState= %d, count1= %d . minEyeBlocks= %lf motion %d\n",blinkState, count1, minEyeBlocks,motion);
+				if (count1 > maxCount)
+					maxCount = count1;
+				/*if (prevMotion == 0 && motion == 1)
+				{
+					count1 = 2000; //cannot be blink
+				}*/ //for later
+				//if ((count1 < maxCount )&&(((count1 <=  minEyeBlocks && motion == 0) || ((double)count1 <= (double)(minEyeBlocks) && motion == 1)) && framesInCurrState > 1) || (framesInCurrState == 1 && (double)count1 <= (double)(minEyeBlocks/2) && prevCount > minEyeBlocks && motion == 0 && count1 < prevCount))
+				if ((count1 < maxCount) && ((count1 <= 2 * minEyeBlocks && motion == 0) && count1 < prevCount && framesInCurrState > 1) || (framesInCurrState == 1 && (double)count1 <= (double)(minEyeBlocks / 2) && prevCount > minEyeBlocks && motion == 0 && count1 < prevCount))
+				//if ((count1 < maxCount) && count1 <= 2*minEyeBlocks  )
+			    {
+                    printf( "***********BLINK DETECTED************\n" );
                     hasBlink = 1;
                     blinkState = 0;
+					prevCount = 0;
                 }
-                else if (count1 > 3 * minEyeBlocks)
-                {
-                    blinkState = 0;
-                }
-
+				else
+				{
+					prevMotion = motion;
+					if (framesInCurrState == 1 && (count1 < minEyeBlocks / 2 || count1 > prevCount || count1 > minEyeBlocks) && motion == 0)
+					{
+						blinkState = 0;
+						prevCount = 0;
+					}
+					else if (count1 > 4 * minEyeBlocks)
+					{
+						blinkState = 0;
+					}
+				}
                 if (blinkState == 4 && framesInCurrState > 7)
                 {
                     blinkState = 0;
+					prevCount = 0;
                 }
-                prevCount = prevcount1;
-            }
+             }
                 break;
-
     }
 
     return hasBlink;

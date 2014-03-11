@@ -150,12 +150,20 @@ cv::Mat generateFrameWithEffect(cv::Mat frame, int effectID, cv::Rect &faceBox)
     if (effectID == 0)
     {
         outputImg = frame.clone();
-        outputImg = outputImg / 2;
+        //outputImg = outputImg / 2;
         //cv::cvtColor(frame, outputImg, CV_BGR2GRAY);
     }
     else if (effectID == 1)
     {
         outputImg = frame;
+
+		// Draw rectangle only if processing is happening
+		if (faceBox.width > 0)
+		{
+			cv::Point lefttop(faceBox.x, faceBox.y);
+			cv::Point rightbottom((faceBox.x + faceBox.width), (faceBox.y + faceBox.height));
+			cv::rectangle(outputImg, lefttop, rightbottom, cv::Scalar(0, 255, 0), 2);
+		}
     }
     else if (effectID == 2)
     {
@@ -165,106 +173,34 @@ cv::Mat generateFrameWithEffect(cv::Mat frame, int effectID, cv::Rect &faceBox)
         {
             for (int i = 0; i < BORDER; i++)
             {
-                outputImg.at<cv::Vec3b>(j, i)[1] = (128 + outputImg.at<cv::Vec3b>(j, i)[1] / 2);
+				outputImg.at<cv::Vec3b>(j, i)[0] = (outputImg.at<cv::Vec3b>(j, i)[0] / 4);
+                outputImg.at<cv::Vec3b>(j, i)[1] = (191 + outputImg.at<cv::Vec3b>(j, i)[1] / 4);
+				outputImg.at<cv::Vec3b>(j, i)[2] = (outputImg.at<cv::Vec3b>(j, i)[2] / 4);
             }
         }
 
-        /*
-        for (int j = 0; j < BORDER; j++)
-        {
-            for (int i = 0; i < outputImg.cols; i++)
-            {
-                //outputImg.at<cv::Vec3b>(j, i)[0] = 0;
-                outputImg.at<cv::Vec3b>(j, i)[1] = (128 + outputImg.at<cv::Vec3b>(j, i)[1]/2);
-                //outputImg.at<cv::Vec3b>(j, i)[2] = 0;
-            }
-        }
-        
-        for (int j = BORDER; j < (outputImg.rows - BORDER); j++)
-        {
-            for (int i = 0; i < BORDER; i++)
-            {
-                //outputImg.at<cv::Vec3b>(j, i)[0] = 0;
-                outputImg.at<cv::Vec3b>(j, i)[1] = (128 + outputImg.at<cv::Vec3b>(j, i)[1] / 2);;
-                //outputImg.at<cv::Vec3b>(j, i)[2] = 0;
-            }
-        }
+		// Draw rectangle only if processing is happening
+		if (faceBox.width > 0)
+		{
+			cv::Point lefttop(faceBox.x, faceBox.y);
+			cv::Point rightbottom((faceBox.x + faceBox.width), (faceBox.y + faceBox.height));
+			cv::rectangle(outputImg, lefttop, rightbottom, cv::Scalar(0, 255, 0), 2);
+		}
 
-        for (int j = BORDER; j < (outputImg.rows - BORDER); j++)
-        {
-            for (int i = (outputImg.cols-BORDER); i < outputImg.cols; i++)
-            {
-                //outputImg.at<cv::Vec3b>(j, i)[0] = 0;
-                outputImg.at<cv::Vec3b>(j, i)[1] = (128 + outputImg.at<cv::Vec3b>(j, i)[1] / 2);;
-                //outputImg.at<cv::Vec3b>(j, i)[2] = 0;
-            }
-        }
-
-        for (int j = outputImg.rows - BORDER; j < outputImg.rows; j++)
-        {
-            for (int i = 0; i < outputImg.cols; i++)
-            {
-                //outputImg.at<cv::Vec3b>(j, i)[0] = 0;
-                outputImg.at<cv::Vec3b>(j, i)[1] = (128 + outputImg.at<cv::Vec3b>(j, i)[1] / 2);;
-                //outputImg.at<cv::Vec3b>(j, i)[2] = 0;
-            }
-        }
-        */
     }
     else if (effectID == 3)
     {
         int BORDER = 15;
         outputImg = frame.clone();
-        outputImg = outputImg / 2;
+        //outputImg = outputImg / 2;
 
         // Draw rectangle only if processing is happening
         if (faceBox.width > 0)
         {
             cv::Point lefttop(faceBox.x, faceBox.y);
             cv::Point rightbottom((faceBox.x + faceBox.width), (faceBox.y + faceBox.height));
-            cv::rectangle(outputImg, lefttop, rightbottom, cv::Scalar(255, 0, 0));
+            cv::rectangle(outputImg, lefttop, rightbottom, cv::Scalar(255, 0, 0),2);
         }
-        /*
-        for (int j = 0; j < BORDER; j++)
-        {
-            for (int i = 0; i < outputImg.cols; i++)
-            {
-                outputImg.at<cv::Vec3b>(j, i)[0] = 0;
-                outputImg.at<cv::Vec3b>(j, i)[1] = 128;
-                outputImg.at<cv::Vec3b>(j, i)[2] = 128;
-            }
-        }
-
-        for (int j = BORDER; j < (outputImg.rows - BORDER); j++)
-        {
-            for (int i = 0; i < BORDER; i++)
-            {
-                outputImg.at<cv::Vec3b>(j, i)[0] = 0;
-                outputImg.at<cv::Vec3b>(j, i)[1] = 128;
-                outputImg.at<cv::Vec3b>(j, i)[2] = 128;
-            }
-        }
-
-        for (int j = BORDER; j < (outputImg.rows - BORDER); j++)
-        {
-            for (int i = (outputImg.cols - BORDER); i < outputImg.cols; i++)
-            {
-                outputImg.at<cv::Vec3b>(j, i)[0] = 0;
-                outputImg.at<cv::Vec3b>(j, i)[1] = 128;
-                outputImg.at<cv::Vec3b>(j, i)[2] = 128;
-            }
-        }
-
-        for (int j = outputImg.rows - BORDER; j < outputImg.rows; j++)
-        {
-            for (int i = 0; i < outputImg.cols; i++)
-            {
-                outputImg.at<cv::Vec3b>(j, i)[0] = 0;
-                outputImg.at<cv::Vec3b>(j, i)[1] = 128;
-                outputImg.at<cv::Vec3b>(j, i)[2] = 128;
-            }
-        }
-        */
     }
 
     return outputImg;
