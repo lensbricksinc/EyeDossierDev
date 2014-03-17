@@ -4,7 +4,7 @@
 #include "blink_detector.h"
 #include "blineME.h"
 #include "blinkStats.h"
-
+#include "FrameDump.h"
 
 //#define READ_IMAGES_FROM_FOLDER
 //cv::string face_cascade_name = "cascades\\haarcascade_frontalface_alt2.xml";
@@ -21,9 +21,9 @@ int main()
     cv::VideoCapture vidCapture;
     cv::CascadeClassifier face_cascade;
     BlinkDetector blinkDetect (face_cascade_name);
+    FRAMEDUMP objectFrameDump;
 
     vidCapture.open(0);
-
     if (vidCapture.isOpened() == false)
     {
         printf("Failed to open video device.");
@@ -64,7 +64,7 @@ int main()
         
 
         outputBlinkDetector = blinkDetect.blink_detect(frame);
-
+        objectFrameDump.AddFrameToInternalMemory(frame);
         /*
         double fExposure = vidCapture.get(CV_CAP_PROP_EXPOSURE);
         char text[255]; 
@@ -77,7 +77,9 @@ int main()
         cv::imshow("Frame", dispFrame);
         int key = cv::waitKey(1);
 
-        if (key > 0)
+        if (key == 'c')
+            objectFrameDump.DumpFrameArrayToMemory("D:\\frame_dump");
+        else if (key > 0)
             break;
             
     }
