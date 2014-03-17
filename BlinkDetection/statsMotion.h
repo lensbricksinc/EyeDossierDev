@@ -15,8 +15,8 @@ private:
 public:
 	double RHO;
 	double INIT_VARIANCE;
-	int prevLeftX, prevLeftY;
-	int prevRightX, prevRightY;
+	double prevLeftX, prevLeftY;
+	double prevRightX, prevRightY;
 
 	MotionRegionOnSAD();
 	~MotionRegionOnSAD();

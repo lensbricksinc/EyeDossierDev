@@ -42,11 +42,11 @@ int main()
     while (true)
     {
         frameNum++;
-        
 
         cv::Mat frame;
 #ifdef READ_IMAGES_FROM_FOLDER
-cv::String sFrameNum;
+        frameNum = frameNum;        // Edit to change the frame number of first frame.
+        cv::String sFrameNum;
         if (frameNum <10)
             sFrameNum = "0000" + std::to_string(frameNum);
         else if (frameNum <100)

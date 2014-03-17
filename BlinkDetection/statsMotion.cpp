@@ -293,7 +293,7 @@ int MotionRegionOnSAD::analyzeMotion(int** mask, int row, double minEyeBlocks, i
 		printf("2 ->  leftXD = %lf rightXD = %lf rightYD = %lf leftYD = %lf \n",  leftXD, rightXD, rightYD, leftYD);
 		if (leftXD < 1.5 && leftYD < 2 && rightXD < 1.5 && rightYD < 2)
 		{
-			if (totalCount > 0.5*minEyeBlocks)
+			if (totalCount > 0.5*minEyeBlocks || totalCount > 10)
 					motion = 1;
 		}
 #endif
