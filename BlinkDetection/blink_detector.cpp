@@ -39,7 +39,7 @@ BlinkDetector::~BlinkDetector()
 
     if (motionStats != NULL)
     {
-        delete[] motionStats;
+        delete motionStats;
         motionStats = nullptr;
     }
     return;
