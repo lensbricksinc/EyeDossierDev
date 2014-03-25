@@ -34,6 +34,9 @@
     <ClCompile Include="FrameDump.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="time_stats.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blineME.h">
@@ -61,6 +64,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="FrameDump.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="time_stats.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

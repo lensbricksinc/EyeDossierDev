@@ -5,6 +5,7 @@
 #include "blineME.h"
 #include "blinkStats.h"
 #include "FrameDump.h"
+#include "time_stats.h"
 
 //#define READ_IMAGES_FROM_FOLDER
 //cv::string face_cascade_name = "cascades\\haarcascade_frontalface_alt2.xml";
@@ -22,6 +23,7 @@ int main()
     cv::CascadeClassifier face_cascade;
     BlinkDetector blinkDetect (face_cascade_name);
     FRAMEDUMP objectFrameDump;
+    TIMETRACKER objectTimeTracker(20);
 
     vidCapture.open(0);
     if (vidCapture.isOpened() == false)
@@ -61,10 +63,17 @@ int main()
 #else
         vidCapture.read(frame);
 #endif
-        
+        objectTimeTracker.addNewEntry();  
 
         outputBlinkDetector = blinkDetect.blink_detect(frame);
         objectFrameDump.AddFrameToInternalMemory(frame);
+
+        double frameRate = objectTimeTracker.getFPS();
+
+        char text[255]; 
+        sprintf(text, "FPS= %f", frameRate);
+        cv::putText(frame, text, cv::Point(30,30),cv::FONT_HERSHEY_COMPLEX_SMALL,1.0, cv::Scalar(0.5,0.5,0.5));
+
         /*
         double fExposure = vidCapture.get(CV_CAP_PROP_EXPOSURE);
         char text[255]; 
@@ -76,6 +85,7 @@ int main()
 
         cv::imshow("Frame", dispFrame);
         int key = cv::waitKey(1);
+
 
         if (key == 'c')
             objectFrameDump.DumpFrameArrayToMemory("D:\\frame_dump");

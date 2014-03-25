@@ -155,6 +155,7 @@
     <ClCompile Include="FrameInfo.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="statsMotion.cpp" />
+    <ClCompile Include="time_stats.cpp" />
     <ClCompile Include="utilityFuncs.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -166,6 +167,7 @@
     <ClInclude Include="getFileNames.h" />
     <ClInclude Include="motionEstDS.h" />
     <ClInclude Include="statsMotion.h" />
+    <ClInclude Include="time_stats.h" />
     <ClInclude Include="utilityFuncs.h" />
   </ItemGroup>
   <ItemGroup>
