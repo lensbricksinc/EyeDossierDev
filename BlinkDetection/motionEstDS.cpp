@@ -61,6 +61,15 @@ void motionEstDS(cv::Mat imgP, cv::Mat imgI, int mbSize, int p, double *motionVe
     for (int i=0; i<lenCosts; i++)
         costs[i] = 65537.0;
 
+    /*
+	int L=0;
+	float divisor=p+1;
+	while (divisor>=2)
+	{
+		divisor= divisor/2;
+		L=L+1;
+	}
+    */
     int L = (int)floor(log(p+1)/log(2));
 
     // The index points for Large Diamond search pattern

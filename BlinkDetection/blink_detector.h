@@ -7,8 +7,8 @@
 #include "blinkStats.h"
 
 #if 1
-#define FD_PERSISTENCE 50
-#define FD_VALIDATION_COUNT 10
+#define FD_PERSISTENCE 25
+#define FD_VALIDATION_COUNT 5
 #else
 #define FD_PERSISTENCE 5
 #define FD_VALIDATION_COUNT 3
@@ -28,8 +28,8 @@ struct FaceTrackingInfo
 
     FaceTrackingInfo() {
         isValid = false;
-        reqValidationCount= FD_VALIDATION_COUNT;
-        remPersistenceCount= FD_PERSISTENCE;
+        reqValidationCount = FD_VALIDATION_COUNT;
+        remPersistenceCount = FD_PERSISTENCE;
 		FaceDim = cv::Rect(-1,-1,-1,-1);
     }
 
@@ -51,7 +51,7 @@ public:
     BlinkDetector();
     ~BlinkDetector();
     
-    BlinkDetector(cv::string face_cascade_file);
+    BlinkDetector(cv::string face_cascade_file1,  cv::string face_cascade_file2);
     struct BlinkDetectorReturnType blink_detect(cv::Mat frame);
     
 
@@ -73,6 +73,7 @@ private:
     FrameInfo *prevFrameInfo;
     FrameInfo *currFrameInfo;
     cv::Rect currBaseSizeBox;
+    cv::Rect prevFaceRect;
     int countNoFace;
     FaceTrackingInfo *faceArray;
     int FrameNum;

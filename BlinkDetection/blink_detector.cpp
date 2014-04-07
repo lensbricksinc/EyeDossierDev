@@ -5,7 +5,7 @@
 
 BlinkDetector::BlinkDetector()
 {
-    BlinkDetector("cascades\\haarcascade_frontalface_alt2.xml");
+    BlinkDetector("haarcascade_frontalface_alt2.xml","cascades\\haarcascade_frontalface_alt2.xml");
 }
 
 
@@ -17,18 +17,10 @@ BlinkDetector::~BlinkDetector()
         blinkStats = NULL;
     }
         
-    if (prevFrameInfo != NULL)
+    if (motionStats != NULL)
     {
-        prevFrameInfo->frame = NULL;    // Is this required for dereferencing??
-        delete prevFrameInfo;
-        prevFrameInfo = nullptr;
-    }
-
-    if (currFrameInfo != NULL)
-    {
-        currFrameInfo->frame = NULL;
-        delete currFrameInfo;
-        currFrameInfo = nullptr;
+        delete motionStats;
+        motionStats = nullptr;
     }
 
     if (faceArray != NULL)
@@ -37,16 +29,25 @@ BlinkDetector::~BlinkDetector()
         faceArray = nullptr;
     }
 
-    if (motionStats != NULL)
+    if (currFrameInfo != NULL)
     {
-        delete motionStats;
-        motionStats = nullptr;
+        currFrameInfo->frame = NULL;
+        delete currFrameInfo;
+        currFrameInfo = nullptr;
     }
+    
+    if (prevFrameInfo != NULL)
+    {
+        prevFrameInfo->frame = NULL;    // Is this required for dereferencing??
+        delete prevFrameInfo;
+        prevFrameInfo = nullptr;
+    }
+
     return;
 }
 
 
-BlinkDetector::BlinkDetector(cv::string face_cascade_file)
+BlinkDetector::BlinkDetector(cv::string face_cascade_file1,  cv::string face_cascade_file2)
 {
     prevFrameInfo = NULL;
     currFrameInfo = NULL;
@@ -54,8 +55,8 @@ BlinkDetector::BlinkDetector(cv::string face_cascade_file)
     countNoFace = 0;
     FrameNum= 0;
     prevFaceBox = cv::Rect(-1,-1,-1,-1);
-
-    face_cascade_name = face_cascade_file;
+    prevFaceRect = cv::Rect(-1,-1,-1,-1);
+    
     
     faceArray = new FaceTrackingInfo[5];
     isReset = false;
@@ -63,11 +64,26 @@ BlinkDetector::BlinkDetector(cv::string face_cascade_file)
     resetBlinkStates();
 
     blinkStats = new BLINK_STATS();
-	if (!face_cascade.load(face_cascade_name))
+    face_cascade_name = "--";
+	if (!face_cascade.load(face_cascade_file1))
     {
-        printf("Unable to load face cascade");
-        return;
+        if (!face_cascade.load(face_cascade_file2))
+        {
+            printf("Unable to load face cascade");
+            goto EXIT;
+        }
+        else
+        {
+            face_cascade_name = face_cascade_file2;
+        }
+    }
+    else
+    {
+        face_cascade_name = face_cascade_file1;
     };
+
+EXIT:
+    return;
 }
 
 
@@ -110,42 +126,48 @@ BlinkDetectorReturnType BlinkDetector::blink_detect(cv::Mat frame)
 
     std::vector<cv::Rect> faces;
     cv::Rect currFace;
-    cv::Mat frame_gray;
 
-    //cvCreateMat(t_height,t_width,CV_8U);
+    if ((FrameNum & 1) == 1)
+    {
+        cv::Mat frame_gray;
 
-    cv::cvtColor(frame, frame_gray, CV_BGR2GRAY);
+        cv::cvtColor(frame, frame_gray, CV_BGR2GRAY);
 
 
-    /*
-    //printf("Num Colour channels of RGB = %d. Bit depth = %d. Data type = %d\n", frame.channels(), frame.depth(), frame.type());
+        /*
+        //printf("Num Colour channels of RGB = %d. Bit depth = %d. Data type = %d\n", frame.channels(), frame.depth(), frame.type());
 
-    cv::Mat frame_yuv;
-    cv::cvtColor(frame, frame_yuv, CV_BGR2YUV);
+        cv::Mat frame_yuv;
+        cv::cvtColor(frame, frame_yuv, CV_BGR2YUV);
 
-    //printf("Num Colour channels of YUV = %d. Bit depth = %d. Data type = %d \n", frame_yuv.channels(), frame_yuv.depth(), frame_yuv.type());
-    
-    cv::Mat frame_ycbcr;
-    std::vector<cv::Mat> yCbCrChannels(3);
-    cv::cvtColor(frame, frame_ycbcr, CV_BGR2YCrCb);
-    cv::split(frame_ycbcr, yCbCrChannels);
+        //printf("Num Colour channels of YUV = %d. Bit depth = %d. Data type = %d \n", frame_yuv.channels(), frame_yuv.depth(), frame_yuv.type());
 
-    //cv::imshow("Y channel", yCbCrChannels[0]);
-    //cv::imshow("Cr channel", yCbCrChannels[1]);
-    //cv::imshow("Cb channel", yCbCrChannels[2]);
+        cv::Mat frame_ycbcr;
+        std::vector<cv::Mat> yCbCrChannels(3);
+        cv::cvtColor(frame, frame_ycbcr, CV_BGR2YCrCb);
+        cv::split(frame_ycbcr, yCbCrChannels);
 
-    //cv::waitKey(1);
+        //cv::imshow("Y channel", yCbCrChannels[0]);
+        //cv::imshow("Cr channel", yCbCrChannels[1]);
+        //cv::imshow("Cb channel", yCbCrChannels[2]);
 
-    printf("Num Colour channels of YCrCb = %d. Bit depth = %d. Data type = %d \n",
-            frame_ycbcr.channels(), frame_ycbcr.depth(), frame_ycbcr.type());
-    */
-    
+        //cv::waitKey(1);
 
-    //-- Detect faces
-    face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );
+        printf("Num Colour channels of YCrCb = %d. Bit depth = %d. Data type = %d \n",
+                frame_ycbcr.channels(), frame_ycbcr.depth(), frame_ycbcr.type());
+        */
 
-    updateFaceSizeForBlockProc(faces);
-    currFace = postProcessFaces(faces);
+        //-- Detect faces
+        face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );
+
+        updateFaceSizeForBlockProc(faces);
+        currFace = postProcessFaces(faces);
+        prevFaceRect = currFace;
+    }
+    else
+    {
+        currFace = prevFaceRect;
+    }
 
     if (currFace.width != -1)
     {
@@ -291,14 +313,14 @@ int BlinkDetector::doMotionEstimation(cv::Mat newFrame, cv::Mat oldFrame, cv::Re
         for (int j = 2; j <= row - 2; j++)
         {
             int ind = i*row + j - 1;
-			if (motionMask[ind] == 1)
+            if (motionMask[ind] == 1)
 			{
 				mask[i][j] = 255;
-				localCount++;
+                localCount++;
 			}
         }
     }
-	motion = motionStats->analyzeMotion(mask,row,minEyeBlocks,localCount,blinkState,row,row);
+    motion = motionStats->analyzeMotion(mask,row,minEyeBlocks,localCount,blinkState,row,row);
 	
     delete[] motionMask;
     motionMask = nullptr;
@@ -337,7 +359,6 @@ int BlinkDetector::StateMachine(cv::Rect faceRegion)
 	minEyeBlocks1 = (double)((7*minEyeBlocks)/10);
 	if (blinkState == 0)
 	{
-		
 		count1 = doMotionEstimation(currFrameInfo->frame, prevFrameInfo->frame, faceRegion, blinkState, thres1, minEyeBlocks, motion);
 		printf("blinkState= %d, count1= %d . FrameNum= %d motion = %d minEyeBlocks %lf \n", blinkState, count1, FrameNum, motion, minEyeBlocks);
 	}

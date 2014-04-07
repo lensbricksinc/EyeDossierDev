@@ -38,7 +38,6 @@ MotionRegionOnSAD::~MotionRegionOnSAD()
 void MotionRegionOnSAD::updateStats(double *motionVect[4], int lenVectors, float VAR_FACTOR, int* motionMask, int blinkState)
 {
     double *motionSAD = motionVect[2];
-	int count;
     numBlocks = lenVectors;
 
     framesCurrRun++;
@@ -90,16 +89,12 @@ void MotionRegionOnSAD::updateStats(double *motionVect[4], int lenVectors, float
 		}
         else
             motionMask[i] = 0;
-
-		if (count > 100)
-		{
-			count = count+1;
-		}
     }
 
     
     return;
 };
+
 int  MotionRegionOnSAD::find(int** mask, int start, int end, int* row, int* col, int endRow)
 {
 	int i, j;
@@ -321,6 +316,7 @@ int MotionRegionOnSAD::analyzeMotion(int** mask, int row, double minEyeBlocks, i
 
 	return motion;
 }
+
 void MotionRegionOnSAD::getMotionMask(double *motionVect[4], float VAR_FACTOR, int* motionMask, int blinkState)
 {
     if (motionMask == nullptr || meanS == nullptr || varS == nullptr)

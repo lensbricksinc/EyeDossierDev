@@ -21,7 +21,7 @@ int main()
     
     cv::VideoCapture vidCapture;
     cv::CascadeClassifier face_cascade;
-    BlinkDetector blinkDetect (face_cascade_name);
+    BlinkDetector blinkDetect (face_cascade_name, face_cascade_name);
     FRAMEDUMP objectFrameDump;
     TIMETRACKER objectTimeTracker(20);
 

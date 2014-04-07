@@ -27,3 +27,4 @@ public:
 	int  analyzeMotion(int** mask, int row, double minEyeBlocks, int motionCount, int blinkState, int imgRows, int imgCols);
 	
 };
+
