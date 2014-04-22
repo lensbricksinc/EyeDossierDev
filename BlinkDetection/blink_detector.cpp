@@ -102,22 +102,6 @@ BlinkDetectorReturnType BlinkDetector::blink_detect(cv::Mat frame)
         prevFrameInfo = currFrameInfo;
 
     FrameNum++;
-    
-#if 0
-    cv::String sFrameNum;
-    sFrameNum = std::to_string(FrameNum);
-
-    if (sFrameNum.size() == 1)
-        sFrameNum = "000" + sFrameNum;
-    else if (sFrameNum.size() == 2)
-        sFrameNum = "00" + sFrameNum;
-    else if (sFrameNum.size() == 3)
-        sFrameNum = "0" + sFrameNum;
-
-    cv::string fileName = "frame_dump\\frame_" + sFrameNum + ".png";
-    cv::imwrite(fileName, frame);
-#endif
-    
 
     currFrameInfo = new FrameInfo();
     currFrameInfo->frame = frame.clone();
@@ -130,32 +114,7 @@ BlinkDetectorReturnType BlinkDetector::blink_detect(cv::Mat frame)
     if ((FrameNum & 1) == 1)
     {
         cv::Mat frame_gray;
-
         cv::cvtColor(frame, frame_gray, CV_BGR2GRAY);
-
-
-        /*
-        //printf("Num Colour channels of RGB = %d. Bit depth = %d. Data type = %d\n", frame.channels(), frame.depth(), frame.type());
-
-        cv::Mat frame_yuv;
-        cv::cvtColor(frame, frame_yuv, CV_BGR2YUV);
-
-        //printf("Num Colour channels of YUV = %d. Bit depth = %d. Data type = %d \n", frame_yuv.channels(), frame_yuv.depth(), frame_yuv.type());
-
-        cv::Mat frame_ycbcr;
-        std::vector<cv::Mat> yCbCrChannels(3);
-        cv::cvtColor(frame, frame_ycbcr, CV_BGR2YCrCb);
-        cv::split(frame_ycbcr, yCbCrChannels);
-
-        //cv::imshow("Y channel", yCbCrChannels[0]);
-        //cv::imshow("Cr channel", yCbCrChannels[1]);
-        //cv::imshow("Cb channel", yCbCrChannels[2]);
-
-        //cv::waitKey(1);
-
-        printf("Num Colour channels of YCrCb = %d. Bit depth = %d. Data type = %d \n",
-                frame_ycbcr.channels(), frame_ycbcr.depth(), frame_ycbcr.type());
-        */
 
         //-- Detect faces
         face_cascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0|CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );

@@ -1,7 +1,5 @@
 #include "blink_detector.h"
 
-
-
 int BlinkDetector::addToInternalFaceArray(cv::Rect currFace)
 {
     int index = -1;
@@ -10,8 +8,8 @@ int BlinkDetector::addToInternalFaceArray(cv::Rect currFace)
         FaceTrackingInfo *faceEntry = &faceArray[i];
         if (faceEntry->isValid)
         {
-            //int deltaX = (faceEntry->FaceDim.width*4)/5;
-            int deltaX = (faceEntry->FaceDim.width * 1) / 8;
+            int deltaX = (faceEntry->FaceDim.width*4)/5;
+            //int deltaX = (faceEntry->FaceDim.width * 1) / 8;
             if( abs(faceEntry->FaceDim.x - currFace.x)<deltaX
                 && abs(faceEntry->FaceDim.y - currFace.y)<deltaX
                 && abs(faceEntry->FaceDim.width - currFace.width)<20)
@@ -31,8 +29,7 @@ int BlinkDetector::addToInternalFaceArray(cv::Rect currFace)
             faceEntry->reqValidationCount--;
 
         faceEntry->IsUpdated = true;
-        // Temporarily sustaining a face until it is available ...
-        //faceEntry->FaceDim = currFace;
+        faceEntry->FaceDim = currFace;
     }
     else
     {
@@ -58,8 +55,6 @@ int BlinkDetector::addToInternalFaceArray(cv::Rect currFace)
     return index;
 
 }
-
-
 
 void BlinkDetector::updateExistingFaceArray()
 {
@@ -87,8 +82,6 @@ void BlinkDetector::updateExistingFaceArray()
     }
     return;
 }
-
-
 
 cv::Rect BlinkDetector::getBestFaceFrmInternalArray()
 {
@@ -125,7 +118,6 @@ cv::Rect BlinkDetector::getBestFaceFrmInternalArray()
         return cv::Rect(-1,-1,-1,-1);
 }
 
-
 cv::Rect BlinkDetector::postProcessFaces(cv::vector<cv::Rect>& faces)
 {
     cv::Rect outFace;
@@ -142,7 +134,6 @@ cv::Rect BlinkDetector::postProcessFaces(cv::vector<cv::Rect>& faces)
 
     return outFace;
 }
-
 
 int BlinkDetector::updateFaceSizeForBlockProc(cv::vector<cv::Rect>& faces)
 {
@@ -170,5 +161,4 @@ int BlinkDetector::resetUpdateStateFaceArray()
 
     return 0;
 }
-
 

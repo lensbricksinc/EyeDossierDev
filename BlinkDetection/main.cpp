@@ -167,15 +167,15 @@ cv::Mat generateFrameWithEffect(cv::Mat frame, int effectID, cv::Rect &faceBox)
     }
     else if (effectID == 1)
     {
-        outputImg = frame;
+      outputImg = frame;
 
-		// Draw rectangle only if processing is happening
-		if (faceBox.width > 0)
-		{
-			cv::Point lefttop(faceBox.x, faceBox.y);
-			cv::Point rightbottom((faceBox.x + faceBox.width), (faceBox.y + faceBox.height));
-			cv::rectangle(outputImg, lefttop, rightbottom, cv::Scalar(0, 255, 0), 2);
-		}
+		  // Draw rectangle only if processing is happening
+		  if (faceBox.width > 0)
+		  {
+			  cv::Point lefttop(faceBox.x, faceBox.y);
+			  cv::Point rightbottom((faceBox.x + faceBox.width), (faceBox.y + faceBox.height));
+			  cv::rectangle(outputImg, lefttop, rightbottom, cv::Scalar(0, 255, 0), 2);
+		  }
     }
     else if (effectID == 2)
     {
