@@ -4,8 +4,10 @@
 class FrameInfo
 {
 public:
-    cv::Mat frame;
+    cv::Mat frameFullSize;
+    cv::Mat frameFaceSec;
     bool faceDetected;
+    std::vector<cv::Point2f> vectFaceRegion;
     cv::Rect faceRegion;
     bool multipleFaces; // Not really required as such. Might be useful for debugging at a later stage.
 

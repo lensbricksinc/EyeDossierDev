@@ -152,10 +152,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="blinkStats.cpp" />
+    <ClCompile Include="face_tracker.cpp" />
     <ClCompile Include="FrameDump.cpp" />
+    <ClCompile Include="getAffineForPoints.cpp" />
     <ClCompile Include="getFileNames.cpp" />
     <ClCompile Include="motionEstDS.cpp" />
-    <ClCompile Include="blineME.cpp" />
     <ClCompile Include="blink_detector.cpp" />
     <ClCompile Include="face_postprocessing.cpp" />
     <ClCompile Include="FrameInfo.cpp" />
@@ -165,11 +166,11 @@
     <ClCompile Include="utilityFuncs.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="blineME.h" />
     <ClInclude Include="blinkStats.h" />
     <ClInclude Include="blink_detector.h" />
     <ClInclude Include="FrameDump.h" />
     <ClInclude Include="FrameInfo.h" />
+    <ClInclude Include="getAffineForPoints.h" />
     <ClInclude Include="getFileNames.h" />
     <ClInclude Include="motionEstDS.h" />
     <ClInclude Include="statsMotion.h" />

@@ -98,7 +98,7 @@ int main()
 }
 
 
-cv::Mat generateFrameWithEffect(cv::Mat frame, int effectID, cv::Rect &faceBox);
+cv::Mat generateFrameWithEffect(cv::Mat frame, int effectID);
 
 BlinkDetector::OutputState prevState = BlinkDetector::OutputState::OUTSTATE_BLINKDETECT_FRAME_IDLE;
 int sustainCount = 5;
@@ -149,38 +149,20 @@ cv::Mat processFrameToDisplay(BlinkDetectorReturnType outputBlinkDetector)
                                 sustainCount, effect, currState, framesToIgnore);*/
 
 
-    return generateFrameWithEffect(outputBlinkDetector.frame, effect, outputBlinkDetector.faceBox);
+    return generateFrameWithEffect(outputBlinkDetector.frame, effect);
 
 };
 
 
 
-cv::Mat generateFrameWithEffect(cv::Mat frame, int effectID, cv::Rect &faceBox)
+cv::Mat generateFrameWithEffect(cv::Mat frame, int effectID)
 {
     cv::Mat outputImg;
+    outputImg = frame.clone();
 
-    if (effectID == 0)
-    {
-        outputImg = frame.clone();
-        //outputImg = outputImg / 2;
-        //cv::cvtColor(frame, outputImg, CV_BGR2GRAY);
-    }
-    else if (effectID == 1)
-    {
-      outputImg = frame;
-
-		  // Draw rectangle only if processing is happening
-		  if (faceBox.width > 0)
-		  {
-			  cv::Point lefttop(faceBox.x, faceBox.y);
-			  cv::Point rightbottom((faceBox.x + faceBox.width), (faceBox.y + faceBox.height));
-			  cv::rectangle(outputImg, lefttop, rightbottom, cv::Scalar(0, 255, 0), 2);
-		  }
-    }
-    else if (effectID == 2)
+    if (effectID == 2)
     {
         int BORDER = 75;
-        outputImg = frame.clone();
         for (int j = 0; j < BORDER; j++)
         {
             for (int i = 0; i < BORDER; i++)
@@ -190,31 +172,7 @@ cv::Mat generateFrameWithEffect(cv::Mat frame, int effectID, cv::Rect &faceBox)
 				outputImg.at<cv::Vec3b>(j, i)[2] = (outputImg.at<cv::Vec3b>(j, i)[2] / 4);
             }
         }
-
-		// Draw rectangle only if processing is happening
-		if (faceBox.width > 0)
-		{
-			cv::Point lefttop(faceBox.x, faceBox.y);
-			cv::Point rightbottom((faceBox.x + faceBox.width), (faceBox.y + faceBox.height));
-			cv::rectangle(outputImg, lefttop, rightbottom, cv::Scalar(0, 255, 0), 2);
-		}
-
-    }
-    else if (effectID == 3)
-    {
-        int BORDER = 15;
-        outputImg = frame.clone();
-        //outputImg = outputImg / 2;
-
-        // Draw rectangle only if processing is happening
-        if (faceBox.width > 0)
-        {
-            cv::Point lefttop(faceBox.x, faceBox.y);
-            cv::Point rightbottom((faceBox.x + faceBox.width), (faceBox.y + faceBox.height));
-            cv::rectangle(outputImg, lefttop, rightbottom, cv::Scalar(255, 0, 0),2);
-        }
     }
 
     return outputImg;
-
 }

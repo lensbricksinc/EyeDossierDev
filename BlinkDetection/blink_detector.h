@@ -55,44 +55,52 @@ public:
     struct BlinkDetectorReturnType blink_detect(cv::Mat frame);
     
 
-private:
-	bool hasFaceBoxChanged(cv::Rect roi);
-	int resetUpdateStateFaceArray();
-	int updateFaceSizeForBlockProc(cv::vector<cv::Rect>& faces);
-    void resetBlinkStates();
-    cv::Rect fObtainRoiUnion();
-    bool fHasMotion(cv::Rect roi);
-    cv::Rect postProcessFaces(cv::vector<cv::Rect>& faces);
-    int addToInternalFaceArray(cv::Rect currFace);
-	void updateExistingFaceArray();
-    cv::Rect getBestFaceFrmInternalArray();
-	int StateMachine(cv::Rect faceRegion);
-    int doMotionEstimation(cv::Mat newFrame, cv::Mat oldFrame, cv::Rect faceRegion, int Index, double &thres1, double minEyeBlocks, int &motion);
-
-    cv::CascadeClassifier face_cascade;
+private:    
     FrameInfo *prevFrameInfo;
     FrameInfo *currFrameInfo;
-    cv::Rect currBaseSizeBox;
-    cv::Rect prevFaceRect;
-    int countNoFace;
-    FaceTrackingInfo *faceArray;
-    int FrameNum;
+    
+    int mFrameNum;
 
-    // Eye Tracking related
+    // Face box/ Tracking related
+    cv::CascadeClassifier face_cascade;
+    
+
+    // Face post processing
+    FaceTrackingInfo *faceArray;
+    int resetFaceData();
+    int resetUpdateStateFaceArray();
+    int updateFaceSizeForBlockProc(cv::vector<cv::Rect>& faces);    // Make face box size multiple of BLOCK_SIZE
+    cv::Rect postProcessFaces(cv::vector<cv::Rect>& faces);
+    int addToInternalFaceArray(cv::Rect currFace);
+    void updateExistingFaceArray();
+    cv::Rect getBestFaceFrmInternalArray();
+
+    // Face tracker related
+    cv::Mat extractWarpedFace(cv::Mat frameRGB, bool &prevFacePhasedOut);
+    bool faceBoxLockedKLT;
+    cv::Mat prevFrameTracked;
+    std::vector <cv::Point2f> pointsFaceBoxTransformed;
+    std::vector <cv::Point2f> prevFeaturePoints;
+    std::vector <cv::Point2f> currFeaturePoints;
+    cv::Mat affInvCumulative;
+    cv::Rect faceBoxFromFD;     // Last frame received from FD which is being tracked
+    int framesInKLTLoop;
+ 
+    // Core blink detection logic/ State machine related
+    cv::Mat refStartFrame;
+    MotionRegionOnSAD *motionStats;
+    BLINK_STATS *blinkStats;
+    bool isReset;         // whether state machine is reset
+    int framesInCurrState;
+    int prevMotion;
     int count;
     int blinkState;
     int count1;
     int prevCount,prevcount1;
-	int maxCount;
-	int prevMotion;
-    int framesInCurrState;
-    cv::Mat prevFrame;    // Needs to be initialised
-    cv::Mat refStartFrame;
-	cv::Rect prevFaceBox;
-	bool isReset;
-	MotionRegionOnSAD *motionStats;
-
-    BLINK_STATS *blinkStats;
+    int maxCount;
+    void resetBlinkStates();
+    int StateMachine(cv::Rect faceRegion);
+    int doMotionEstimation(cv::Mat newFrame, cv::Mat oldFrame, cv::Rect faceRegion, int Index, double &thres1, double minEyeBlocks, int &motion);
 
 public:
     enum OutputState
@@ -109,7 +117,8 @@ public:
 typedef struct BlinkDetectorReturnType {
     cv::Mat frame;
     BlinkDetector::OutputState outState;
-    cv::Rect faceBox;
+    //cv::Rect faceBox;
+    cv::Mat  matFaceBox;
 }BlinkDetectorReturnType;
 
 

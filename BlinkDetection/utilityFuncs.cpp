@@ -157,9 +157,6 @@ void dumpFrames(cv::Mat img)
 {
     static int frameCount = 0;
 
-
-
-
 }
 
 /*

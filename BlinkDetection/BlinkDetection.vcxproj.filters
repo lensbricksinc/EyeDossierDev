@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="blineME.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="blink_detector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -37,11 +34,14 @@
     <ClCompile Include="time_stats.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="face_tracker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="getAffineForPoints.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="blineME.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="blink_detector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -67,6 +67,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="time_stats.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="getAffineForPoints.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

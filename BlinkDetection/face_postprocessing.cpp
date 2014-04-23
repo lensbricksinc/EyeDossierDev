@@ -139,12 +139,12 @@ int BlinkDetector::updateFaceSizeForBlockProc(cv::vector<cv::Rect>& faces)
 {
     for (int i=0; i<faces.size(); i++)
     {
-        int faceRem = faces[i].width % BLOCK_SIZE;
-        int extraReq =  (faceRem == 0)?0:(BLOCK_SIZE-faceRem);
-        faces[i].x -= extraReq/2;
-        faces[i].y -= extraReq/2;
-        faces[i].width += extraReq;
-        faces[i].height += extraReq;
+        int extraForRem = faces[i].width % BLOCK_SIZE;
+        //int extraReq =  (extraForRem == 0)?0:(BLOCK_SIZE-extraForRem);
+        faces[i].x += extraForRem/2;
+        faces[i].y += extraForRem/2;
+        faces[i].width -= extraForRem;
+        faces[i].height -= extraForRem;
     }
 
     return 0;
@@ -162,3 +162,13 @@ int BlinkDetector::resetUpdateStateFaceArray()
     return 0;
 }
 
+
+int BlinkDetector::resetFaceData()
+{
+    for (int i=0; i<5; i++)
+    {
+        FaceTrackingInfo *faceEntry = &faceArray[i];
+        faceEntry->reset();
+    }
+    return 0;
+}
