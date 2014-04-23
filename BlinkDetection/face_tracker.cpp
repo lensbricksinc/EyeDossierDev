@@ -132,10 +132,15 @@ cv::Mat BlinkDetector::extractWarpedFace(cv::Mat frameRGB, bool &flagNewFace)
             // BORDER_TRANSPARENT, BORDER_REPLICATE, BORDER_REFLECT, BORDER_WRAP, BORDER_REFLECT_101= BORDER_DEFAULT, BORDER_ISOLATED
             cv::Mat frameOut;
             cv::warpAffine(frameRGB.clone(), frameOut, affInvCumulative (cv::Rect(0,0,3,2)), frameRGB.size(), 1, borderMode);
-            cv::Rect faceBoxSection =  findFaceBox(frameOut, faceBoxFromFD);
 
-            //cv::imshow( "Frames", frameOut(faceBoxSection) );
-            retMat = frameOut(faceBoxSection);
+            bool reInitOutOfBoundFB = false;
+            cv::Rect faceBoxSection =  findFaceBox(frameOut, faceBoxFromFD, reInitOutOfBoundFB);
+
+            if (!reInitOutOfBoundFB)
+            {
+                //cv::imshow( "Frames", frameOut(faceBoxSection) );
+                retMat = frameOut(faceBoxSection);
+            }
             prevFrameTracked = grayframe2.clone();
             prevFeaturePoints.clear();
 
@@ -148,7 +153,7 @@ cv::Mat BlinkDetector::extractWarpedFace(cv::Mat frameRGB, bool &flagNewFace)
             }
 
             // Also reinit if the box gets overly distorted.
-            if (prevFeaturePoints.size() < 4 || framesInKLTLoop >1000)
+            if (prevFeaturePoints.size() < 4 || framesInKLTLoop >1000 || reInitOutOfBoundFB)
             {
                 faceBoxLockedKLT = false;
             }
@@ -177,7 +182,7 @@ cv::Mat BlinkDetector::extractWarpedFace(cv::Mat frameRGB, bool &flagNewFace)
 
         prevFeaturePoints = std::vector<cv::Point2f>();
         currFaceFromFD = postProcessFaces(faces);
-    
+
         if (currFaceFromFD.width >0)
         {
             // Potential candidate for KLT based tracking.

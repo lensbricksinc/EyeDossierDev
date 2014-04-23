@@ -1,6 +1,6 @@
 
 #include <math.h>
-#include <stdio.h>
+//#include <stdio.h>
 #include "statsMotion.h";
 
 
@@ -242,7 +242,7 @@ int MotionRegionOnSAD::analyzeMotion(int** mask, int row, double minEyeBlocks, i
 
 	motion = 0;
 	totalCount = countLeft + countRight;
-    printf("1 -> totalCount = %lf leftX = %lf rightX = %lf rightY = %lf leftY = %lf row = %d\n", totalCount, leftX, rightX, rightY, leftY,row);
+    //printf("1 -> totalCount = %lf leftX = %lf rightX = %lf rightY = %lf leftY = %lf row = %d\n", totalCount, leftX, rightX, rightY, leftY,row);
 	if (blinkState == 0)
 	{
 
@@ -285,7 +285,7 @@ int MotionRegionOnSAD::analyzeMotion(int** mask, int row, double minEyeBlocks, i
 		leftYD = abs(leftY - prevLeftY);
 		rightXD = abs(rightX - prevRightX);
 		rightYD = abs(rightY - prevRightY);
-		printf("2 ->  leftXD = %lf rightXD = %lf rightYD = %lf leftYD = %lf \n",  leftXD, rightXD, rightYD, leftYD);
+		//printf("2 ->  leftXD = %lf rightXD = %lf rightYD = %lf leftYD = %lf \n",  leftXD, rightXD, rightYD, leftYD);
 		if (leftXD < 1.5 && leftYD < 2 && rightXD < 1.5 && rightYD < 2)
 		{
 			if (totalCount > 0.5*minEyeBlocks || totalCount > 10)

@@ -21,7 +21,7 @@ void normalizePoints(std::vector<cv::Point2f> &points,
 
 void drawFaceBox(cv::Mat frame, std::vector<cv::Point2f> faceBox);
 
-cv::Rect findFaceBox(cv::Mat frame, cv::Rect origSizeFaceBox);
+cv::Rect findFaceBox(cv::Mat frame, cv::Rect origSizeFaceBox, bool &outBoolForceReinit);
 
 bool isFeatureResetRequired(cv::Mat fullFrame, cv::vector<cv::Point2f> faceBox, std::vector<cv::Point2f> featurePoints);
 

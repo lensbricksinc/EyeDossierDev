@@ -62,7 +62,8 @@ BlinkDetector::BlinkDetector(cv::string face_cascade_file1,  cv::string face_cas
     motionStats = new MotionRegionOnSAD();
     resetBlinkStates();
 
-    blinkStats = new BLINK_STATS();
+    blinkStats = NULL;
+    //blinkStats = new BLINK_STATS();
     face_cascade_name = "--";
 	if (!face_cascade.load(face_cascade_file1))
     {
@@ -130,12 +131,12 @@ BlinkDetectorReturnType BlinkDetector::blink_detect(cv::Mat frame)
             if (state == 1)
             {
                 ret.outState = OUTSTATE_BLINKDETECT_FRAME_BLINK;
-                blinkStats->addEvent(BLINK_STATS::BLINK_STATS_EVENT::EVENT_BLINK_EYEBLINK);
+                //blinkStats->addEvent(BLINK_STATS::BLINK_STATS_EVENT::EVENT_BLINK_EYEBLINK);
             }
             else
             {
                 ret.outState = OUTSTATE_BLINKDETECT_FRAME_NOBLINK;
-                blinkStats->addEvent(BLINK_STATS::BLINK_STATS_EVENT::EVENT_BLINK_ANALYSING);
+                //blinkStats->addEvent(BLINK_STATS::BLINK_STATS_EVENT::EVENT_BLINK_ANALYSING);
             }
         }
         ret.matFaceBox = faceWarpedImage;
@@ -144,7 +145,7 @@ BlinkDetectorReturnType BlinkDetector::blink_detect(cv::Mat frame)
     {
         ret.outState = OUTSTATE_BLINKDETECT_FRAME_IDLE;
         ret.matFaceBox = cv::Mat();
-        blinkStats->addEvent(BLINK_STATS::BLINK_STATS_EVENT::EVENT_BLINK_NODATA);
+        //blinkStats->addEvent(BLINK_STATS::BLINK_STATS_EVENT::EVENT_BLINK_NODATA);
     }
     ret.frame = frame;
 

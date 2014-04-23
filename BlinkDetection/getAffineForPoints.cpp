@@ -140,13 +140,14 @@ void drawFaceBox(cv::Mat frame, std::vector<cv::Point2f> faceBox)
   cv::polylines(frame, faceBoxInt, true, cv::Scalar(255,0,255),2);
 }
 
-cv::Rect findFaceBox(cv::Mat frame, cv::Rect origSizeFaceBox)
+cv::Rect findFaceBox(cv::Mat frame, cv::Rect origSizeFaceBox, bool &outBoolForceReinit)
 {
   cv::Rect retValue = cv::Rect(-1,-1,-1,-1);
   int xMin=frame.cols;
   int yMin=frame.rows;
   int xMax= 0;
   int yMax= 0;
+  outBoolForceReinit = false;
 
   for (int i=0; i<frame.rows; i++)
   {
@@ -166,42 +167,30 @@ cv::Rect findFaceBox(cv::Mat frame, cv::Rect origSizeFaceBox)
        }
     }
   }
-  retValue = cv::Rect(xMin, yMin, xMax-xMin+1, yMax-yMin+1);
+  retValue = cv::Rect(xMin, yMin, xMax-xMin+1, yMax-yMin+1);    // This will always be in range of the frame
 
-  if (retValue.width > origSizeFaceBox.width)
+  if (retValue.width != origSizeFaceBox.width)
   {
     int diff = retValue.width - origSizeFaceBox.width;
     int diff_2 = diff/2;
-    retValue.x = MAX(retValue.x + diff_2, 0);
+    retValue.x = retValue.x + diff_2;
     retValue.width = origSizeFaceBox.width;
-  } else if (retValue.width < origSizeFaceBox.width)
-  {
-    int diff = retValue.width - origSizeFaceBox.width;
-    int diff_2 = diff/2;
-    retValue.x = MAX(retValue.x + diff_2, 0);
-    retValue.width = origSizeFaceBox.width;
+    if (retValue.x < 0 || (retValue.x + retValue.width >= frame.cols))
+        outBoolForceReinit = true;
   }
 
-  if (retValue.height > origSizeFaceBox.height)
+  if (retValue.height != origSizeFaceBox.height)
   {
     int diff = retValue.height - origSizeFaceBox.height;
     int diff_2 = diff/2;
-    retValue.y = MAX(retValue.y + diff_2,0);
+    retValue.y = retValue.y + diff_2;
     retValue.height = origSizeFaceBox.height;
-  } else if (retValue.height < origSizeFaceBox.height)
-  {
-    int diff = retValue.height - origSizeFaceBox.height;
-    int diff_2 = diff/2;
-    retValue.y = MAX(retValue.y + diff_2,0);
-    retValue.height = origSizeFaceBox.height;
+    if (retValue.y < 0 || (retValue.y + retValue.height >= frame.rows))
+        outBoolForceReinit = true;
   }
-
-  //cv::imshow("Find Pink Region",frame);
-  //cv::waitKey(0);
 
   return retValue;
-}
-
+};
 
 bool isFeatureResetRequired(cv::Mat fullFrame, cv::vector<cv::Point2f> faceBox, std::vector<cv::Point2f> featurePoints)
 {
