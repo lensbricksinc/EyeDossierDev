@@ -350,7 +350,7 @@ void BlinkDetector::resetBlinkStates()
 {
     if (isReset == false)
     {
-        faceBoxFromFD = cv::Rect(-1, -1, -1, -1);
+        //faceBoxFromFD = cv::Rect(-1, -1, -1, -1);
         motionStats->resetMotionStats();
         count= 0;
         blinkState= 0;
