@@ -42,7 +42,7 @@ void getFeaturePoints2(cv::Mat imgGray, std::vector<cv::Point2f> &outFeaturePoin
   cv::Mat imgGrayRoi = imgGray(roi);
   int MAX_NUM_CORNERS= 100;
   double qualityLevel = 0.01;   // Parameter characterizing the minimal accepted quality of image corners
-  double minDistance = 10;  // Minimum possible Euclidean distance between the returned corners
+  double minDistance = 12;  // Minimum possible Euclidean distance between the returned corners
   int blockSize = 3;    // Size of an average block for computing a derivative covariation matrix over each pixel neighborhood
   bool useHarrisDetector = false;
   double k = 0.04;    // Free parameter of the Harris detector

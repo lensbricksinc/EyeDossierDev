@@ -16,7 +16,7 @@ void getAffineForPoints(std::vector<cv::Point2f> &points1,
     maxUniqueVals = (totalPoints * (totalPoints-1) * (totalPoints-2))/6;    // nC3
   else
     maxUniqueVals = 1;
-  int MAX_ITER = MIN(100, maxUniqueVals);
+  int MAX_ITER = MIN(15, maxUniqueVals);
   int currIter = 0;
   cv::Mat bestAffineMat;
   int numTrials = MAX_ITER;
