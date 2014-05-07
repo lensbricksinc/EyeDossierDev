@@ -84,6 +84,11 @@ int main()
         cv::Mat dispFrame = processFrameToDisplay(outputBlinkDetector);
 
         cv::imshow("Frame", dispFrame);
+        if (outputBlinkDetector.matFaceBox.rows > 0)
+            cv::imshow("Face Section", outputBlinkDetector.matFaceBox);
+        else
+            cv::destroyWindow("Face Section");
+
         int key = cv::waitKey(1);
 
 
