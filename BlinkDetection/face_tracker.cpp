@@ -116,7 +116,6 @@ cv::Mat BlinkDetector::extractWarpedFace(cv::Mat frameRGB, bool &flagNewFace)
                 circle( frameRGB, cv::Point2f( currFeaturePoints[i].x , currFeaturePoints[i].y ), 1,  cv::Scalar(0,0,255), 2, 8, 0 );
             }
             */
-            drawFaceBox(frameRGB, pointsFaceBoxTransformed);
 
             cv::Mat affInv;
 
@@ -134,24 +133,29 @@ cv::Mat BlinkDetector::extractWarpedFace(cv::Mat frameRGB, bool &flagNewFace)
             cv::warpAffine(frameRGB.clone(), frameOut, affInvCumulative (cv::Rect(0,0,3,2)), frameRGB.size(), 1, borderMode);
 
             bool reInitOutOfBoundFB = false;
-            cv::Rect faceBoxSection =  findFaceBox(frameOut, faceBoxFromFD, reInitOutOfBoundFB);
-
+            cv::Rect faceBoxSection =  findFaceBox(frameOut, faceBoxFromFD, reInitOutOfBoundFB, affInvCumulative, pointsFaceBoxTransformed);
             if (!reInitOutOfBoundFB)
             {
                 //cv::imshow( "Frames", frameOut(faceBoxSection) );
-                retMat = frameOut(faceBoxSection);
-            }
-            prevFrameTracked = grayframe2.clone();
-            prevFeaturePoints.clear();
+                retMat = frameOut(faceBoxSection).clone();      // clone is required since we would draw a pink box in the original frame.
 
-            for (int i=0; i< currFeaturePoints.size(); i++)
-            {
-              if (inliers[i] == 1)
-              {
-                prevFeaturePoints.push_back(currFeaturePoints[i]);
-              }
-            }
+                //cv::imshow("Face Region",retMat);
+                //cv::waitKey(1);
 
+                prevFrameTracked = grayframe2.clone();
+                prevFeaturePoints.clear();
+
+                for (int i=0; i< currFeaturePoints.size(); i++)
+                {
+                    if (inliers[i] == 1)
+                    {
+                        prevFeaturePoints.push_back(currFeaturePoints[i]);
+                    }
+                }
+
+                drawFaceBox(frameRGB, pointsFaceBoxTransformed);
+            }
+            
             // Also reinit if the box gets overly distorted.
             if (prevFeaturePoints.size() < 4 || framesInKLTLoop >1000 || reInitOutOfBoundFB)
             {

@@ -24,6 +24,11 @@
 double costFuncMAD(cv::Mat a, cv::Mat b, int size)
 {
     double val = 0;
+#if 0
+    // This is much worse performance-wise!!! Logically doesn't make  sense.
+    cv::Mat c = cv::abs(a - b);
+    val = cv::sum(c)[0,0];
+#else
     for (int i=0; i<size; i++){
         for (int j=0; j<size; j++)
         {
@@ -31,6 +36,7 @@ double costFuncMAD(cv::Mat a, cv::Mat b, int size)
         }
     
     }
+#endif
     val = val/(double)(size*size);
     return val;
 }
@@ -62,13 +68,13 @@ void motionEstDS(cv::Mat imgP, cv::Mat imgI, int mbSize, int p, double *motionVe
         costs[i] = 65537.0;
 
     /*
-	int L=0;
-	float divisor=p+1;
-	while (divisor>=2)
-	{
-		divisor= divisor/2;
-		L=L+1;
-	}
+    int L=0;
+    float divisor=p+1;
+    while (divisor>=2)
+    {
+        divisor= divisor/2;
+        L=L+1;
+    }
     */
     int L = (int)floor(log(p+1)/log(2));
 

@@ -140,15 +140,19 @@ void drawFaceBox(cv::Mat frame, std::vector<cv::Point2f> faceBox)
   cv::polylines(frame, faceBoxInt, true, cv::Scalar(255,0,255),2);
 }
 
-cv::Rect findFaceBox(cv::Mat frame, cv::Rect origSizeFaceBox, bool &outBoolForceReinit)
+cv::Rect findFaceBox(cv::Mat frame, cv::Rect origSizeFaceBox, bool &outBoolForceReinit,
+                     cv::Mat affMatInv, std::vector<cv::Point2f> pointsFaceBoxTransformed)
 {
   cv::Rect retValue = cv::Rect(-1,-1,-1,-1);
+  outBoolForceReinit = false;
+
+  /*
+  // Searching for face box using it's colour!!!
   int xMin=frame.cols;
   int yMin=frame.rows;
   int xMax= 0;
   int yMax= 0;
-  outBoolForceReinit = false;
-
+  
   for (int i=0; i<frame.rows; i++)
   {
     for (int j=0; j<frame.cols; j++) {
@@ -167,6 +171,20 @@ cv::Rect findFaceBox(cv::Mat frame, cv::Rect origSizeFaceBox, bool &outBoolForce
        }
     }
   }
+  */
+  std::vector<cv::Point2f> pointsFB = std::vector<cv::Point2f>();
+  transformPointsForward(pointsFaceBoxTransformed, pointsFB, affMatInv);
+
+  int xMin = MIN(pointsFB[0].x, pointsFB[3].x);
+  int xMax = MAX(pointsFB[1].x, pointsFB[2].x);
+  int yMin = MIN(pointsFB[0].y, pointsFB[1].y);
+  int yMax = MAX(pointsFB[2].y, pointsFB[3].y);
+
+  xMin = MAX(xMin, 0);
+  xMax = MIN(xMax, frame.cols-1);
+  yMin = MAX(yMin, 0);
+  yMax = MIN(yMax, frame.rows-1);
+  
   retValue = cv::Rect(xMin, yMin, xMax-xMin+1, yMax-yMin+1);    // This will always be in range of the frame
 
   if (retValue.width != origSizeFaceBox.width)
