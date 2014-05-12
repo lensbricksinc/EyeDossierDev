@@ -3,6 +3,11 @@
 int BlinkDetector::addToInternalFaceArray(cv::Rect currFace)
 {
     int index = -1;
+
+	if (currFace.width < MIN_FACE_WIDTH)		// This number should be a percentage of camera resolution.
+	{
+		return index;
+	}
     for (int i=0; i<5; i++)
     {
         FaceTrackingInfo *faceEntry = &faceArray[i];

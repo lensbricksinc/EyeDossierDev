@@ -187,6 +187,10 @@ cv::Mat BlinkDetector::extractWarpedFace(cv::Mat frameRGB, bool &flagNewFace)
         prevFeaturePoints = std::vector<cv::Point2f>();
         currFaceFromFD = postProcessFaces(faces);
 
+		//printf("Current face width= %d\n", currFaceFromFD.width);
+		//std::cout << std::endl;
+		//std::cout.flush();
+
         if (currFaceFromFD.width >0)
         {
             // Potential candidate for KLT based tracking.

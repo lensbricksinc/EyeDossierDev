@@ -15,7 +15,7 @@
 #endif
 
 #define BLOCK_SIZE 8
-
+#define MIN_FACE_WIDTH 125
 
 
 struct FaceTrackingInfo
