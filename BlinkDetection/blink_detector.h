@@ -8,7 +8,7 @@
 
 #if 1
 #define FD_PERSISTENCE 25
-#define FD_VALIDATION_COUNT 5
+#define FD_VALIDATION_COUNT 2
 #else
 #define FD_PERSISTENCE 5
 #define FD_VALIDATION_COUNT 3

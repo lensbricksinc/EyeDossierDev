@@ -170,8 +170,7 @@ cv::Mat BlinkDetector::extractWarpedFace(cv::Mat frameRGB, bool &flagNewFace)
 
     }
 
-
-    if (!faceBoxLockedKLT)
+    if (!faceBoxLockedKLT && ((mFrameNum & 0x03) == 0x00))		// Do face detection every fourth frame.
     {
         std::vector<cv::Rect> faces;
         cv::Rect currFaceFromFD;
