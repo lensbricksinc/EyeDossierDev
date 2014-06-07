@@ -310,6 +310,9 @@ BlinkDetectorReturnType BlinkDetector::blink_detect(cv::Mat frame, int blinkStat
 				else
 					ret.outState = OUTSTATE_BLINKDETECT_FRAME_NOBLINK;
 
+				if(blink)
+					std::cout << "****** Blink Detected! ******" << std::endl;
+
 #ifdef TEST_AND_DUMP_SVM_RESULTS
 				bool closed = (y > DETECT_THRESHOLD);
 				bool unsure = (y <= DETECT_THRESHOLD) & (y >= -DETECT_THRESHOLD);
@@ -354,9 +357,9 @@ BlinkDetectorReturnType BlinkDetector::blink_detect(cv::Mat frame, int blinkStat
 
 				//std::cout << "Label predicted for frame " << mFrameNum << " : " << y << std::endl;
 				//cv::waitKey(0);
-				if(blink) {
+				/*if(blink) {
 					cv::rectangle(frame, cv::Rect(0, 0, 50, 50), cv::Scalar(0, 255, 0), -1);
-				}
+				}*/
 #endif
 
 #ifdef DUMP_HOG
@@ -377,7 +380,7 @@ BlinkDetectorReturnType BlinkDetector::blink_detect(cv::Mat frame, int blinkStat
 		}
 EXIT:
 //		cv::imshow("Gray face", faceWarped_gray(roi));
-		cv::imshow("Warped face box", faceWarpedImage);
+		//cv::imshow("Warped face box", faceWarpedImage);
 
 		/*
         currFrameInfo->faceDetected = true;
