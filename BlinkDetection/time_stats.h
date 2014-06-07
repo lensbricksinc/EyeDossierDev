@@ -1,5 +1,6 @@
 
-
+#ifndef __TIME_STATS_H__
+#define __TIME_STATS_H__
 
 class TIMETRACKER {
 private:
@@ -19,3 +20,5 @@ public:
 
     void resetStats();
 };
+
+#endif

@@ -35,7 +35,7 @@ MotionRegionOnSAD::~MotionRegionOnSAD()
 };
 
 
-void MotionRegionOnSAD::updateStats(double *motionVect[4], int lenVectors, float VAR_FACTOR, int* motionMask, int blinkState)
+void MotionRegionOnSAD::updateStats(double *motionVect[4], int lenVectors, float VAR_FACTOR, int* motionMask, int blinkState, double *extraOutput)
 {
     double *motionSAD = motionVect[2];
     numBlocks = lenVectors;
@@ -71,13 +71,14 @@ void MotionRegionOnSAD::updateStats(double *motionVect[4], int lenVectors, float
         return;
     }
 
+	
+
     for (int i = 0; i < lenVectors; i++)
     {
         double currDiff = motionSAD[i];
         currDiff = currDiff*currDiff;
         if (blinkState == 0 || framesCurrRun < 30)
         {
-        
             //meanS[i] = (1 - RHO)*meanS[i] + RHO*motionSAD[i];
 			//meanS[i] = 0;
 			varS[i] = (1 - RHO)*varS[i] + RHO*currDiff;
@@ -89,6 +90,11 @@ void MotionRegionOnSAD::updateStats(double *motionVect[4], int lenVectors, float
 		}
         else
             motionMask[i] = 0;
+
+		if (extraOutput!= nullptr && i < 100)
+		{
+			extraOutput[i] = currDiff/varS[i];
+		}
     }
 
     
@@ -166,7 +172,7 @@ int MotionRegionOnSAD::calculateEyeBlocks(int** mask, int start, int end, int* r
 	return count;
 }
 
-int MotionRegionOnSAD::analyzeMotion(int** mask, int row, double minEyeBlocks, int motionCount, int blinkState, int imgRows, int imgCols)
+int MotionRegionOnSAD::analyzeMotion(int** mask, int row, double minEyeBlocks, int motionCount, int blinkState, int imgRows, int imgCols, double *outputOthers)
 {
 	int motion = 0;
 	int *sum;
@@ -240,6 +246,18 @@ int MotionRegionOnSAD::analyzeMotion(int** mask, int row, double minEyeBlocks, i
 	varRightX = var(rightIndexRow, rightX, rightCount);
 	varRightY = var(rightIndexCol, rightY, rightCount);
 
+    if (outputOthers != nullptr)
+    {
+    	outputOthers[0] = leftX/minEyeBlocks;
+    	outputOthers[1] = leftY/minEyeBlocks;
+    	outputOthers[2] = rightX/minEyeBlocks;
+    	outputOthers[3] = rightY/minEyeBlocks;
+    	outputOthers[4] = varLeftX/minEyeBlocks;
+    	outputOthers[5] = varLeftY/minEyeBlocks;
+    	outputOthers[6] = varRightX/minEyeBlocks;
+    	outputOthers[7] = varRightY/minEyeBlocks;
+    }
+
 	motion = 0;
 	totalCount = countLeft + countRight;
     //printf("1 -> totalCount = %lf leftX = %lf rightX = %lf rightY = %lf leftY = %lf row = %d\n", totalCount, leftX, rightX, rightY, leftY,row);
@@ -293,20 +311,7 @@ int MotionRegionOnSAD::analyzeMotion(int** mask, int row, double minEyeBlocks, i
 		}
 #endif
 	}
-	/*
-	if (blinkState == 0)
-	{
-		if (totalCount >= (double)(minEyeBlocks)*1.0/ 2 && (leftX >= (((double)(row)*1.0 / 4) || varLeftX < 2)) && ((rightX >= (double)(row) / 4) || varRightX < 2)&& ((rightY <= 3.0 * (double)(row) / 4) || varRightY < 2 )&& ((leftY >= (double)(row) / 4) || varLeftY < 2) && (rightY - leftY) <= (3 * (double)row) / 5 /*&& (rightY - leftY) >= (2 * row) / 5)
-		{
-			motion = 1;
-		}
-	}
-	else
-	{
-		if (((leftX >= (double)row / 4) || varLeftX < 2) && ((rightX >= (double)row / 4)||varRightX < 2) && (rightY - leftY) <= (3 * (double)row) / 5 && ((rightY <= 3 * (double)row / 4) || varRightY < 2) && ((leftY >= (double)row / 4) || varLeftY < 2) /*&& (rightY - leftY) >= (2 * row) / 5)
-				motion = 1;
-	}
-	*/
+
 	delete[] sum;
 
 	delete[] leftIndexRow;

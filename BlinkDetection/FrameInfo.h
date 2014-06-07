@@ -1,3 +1,5 @@
+#ifndef __FRAMEINFO_H__
+#define __FRAMEINFO_H__
 
 #include <opencv2\opencv.hpp>
 
@@ -15,3 +17,4 @@ public:
     cv::Rect ObtainRoiUnion(cv::vector<cv::Rect>& objects);
     // Region where face was detected.
 };
+#endif

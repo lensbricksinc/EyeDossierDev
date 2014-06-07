@@ -1,3 +1,5 @@
+#ifndef __GETAFFINEFORPOINTS_H__
+#define __GETAFFINEFORPOINTS_H__
 
 #include <opencv2/opencv.hpp>
 
@@ -37,3 +39,5 @@ void transformPointsForward(std::vector<cv::Point2f> &points1,
 void transformPointsForward(std::vector<cv::Point2i> &points1,
                      std::vector<cv::Point2i> &points2,
                      cv::Mat affineMat);
+
+#endif

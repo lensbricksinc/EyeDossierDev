@@ -1,3 +1,5 @@
+#ifndef __FRAMEDUMP_H__
+#define __FRAMEDUMP_H__
 
 #include <iostream>
 #include <opencv2\opencv.hpp>
@@ -90,3 +92,5 @@ public:
     }
 
 };
+
+#endif

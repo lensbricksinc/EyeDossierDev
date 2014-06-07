@@ -85,13 +85,13 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(OPENCV_ROOT_WIN)\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\opencv248\opencv\build\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(OPENCV_ROOT_WIN)\build\x86\vc11\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opencv_core248d.lib;opencv_features2d248d.lib;opencv_flann248d.lib;opencv_highgui248d.lib;opencv_imgproc248d.lib;opencv_objdetect248d.lib;opencv_video248d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\opencv248\opencv\build\x86\vc11\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_core248d.lib;opencv_features2d248d.lib;opencv_flann248d.lib;opencv_highgui248d.lib;opencv_imgproc248d.lib;opencv_objdetect248d.lib;opencv_video248d.lib;opencv_ml248d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -119,15 +119,15 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(OPENCV_ROOT_WIN)\build\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\opencv248\opencv\build\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(OPENCV_ROOT_WIN)\build\x86\vc11\lib</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opencv_core248.lib;opencv_features2d248.lib;opencv_flann248.lib;opencv_highgui248.lib;opencv_imgproc248.lib;opencv_objdetect248.lib;opencv_video248.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\opencv248\opencv\build\x86\vc11\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_core248.lib;opencv_features2d248.lib;opencv_flann248.lib;opencv_highgui248.lib;opencv_imgproc248.lib;opencv_objdetect248.lib;opencv_video248.lib;opencv_ml248.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -152,16 +152,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="blinkStats.cpp" />
+    <ClCompile Include="blink_detection_ml.cpp" />
     <ClCompile Include="face_tracker.cpp" />
     <ClCompile Include="FrameDump.cpp" />
     <ClCompile Include="getAffineForPoints.cpp" />
     <ClCompile Include="getFileNames.cpp" />
+    <ClCompile Include="HOGcompute.cpp" />
+    <ClCompile Include="HOGvisualize.cpp" />
+    <ClCompile Include="ml_core.cpp" />
     <ClCompile Include="motionEstDS.cpp" />
     <ClCompile Include="blink_detector.cpp" />
     <ClCompile Include="face_postprocessing.cpp" />
     <ClCompile Include="FrameInfo.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="classify.c" />
     <ClCompile Include="statsMotion.cpp" />
+    <ClCompile Include="svm-predict.c" />
+    <ClCompile Include="svm-scale.c" />
+    <ClCompile Include="svm.cpp" />
     <ClCompile Include="time_stats.cpp" />
     <ClCompile Include="utilityFuncs.cpp" />
   </ItemGroup>
@@ -172,8 +180,11 @@
     <ClInclude Include="FrameInfo.h" />
     <ClInclude Include="getAffineForPoints.h" />
     <ClInclude Include="getFileNames.h" />
+    <ClInclude Include="ml_core.h" />
     <ClInclude Include="motionEstDS.h" />
+    <ClInclude Include="params.h" />
     <ClInclude Include="statsMotion.h" />
+    <ClInclude Include="svm.h" />
     <ClInclude Include="time_stats.h" />
     <ClInclude Include="utilityFuncs.h" />
   </ItemGroup>
@@ -183,6 +194,9 @@
     <Xml Include="cascades\haarcascade_frontalface_alt_tree.xml" />
     <Xml Include="cascades\haarcascade_frontalface_default.xml" />
     <Xml Include="cascades\lbpcascade_frontalface.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="svm.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

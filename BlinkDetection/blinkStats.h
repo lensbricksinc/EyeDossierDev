@@ -1,5 +1,5 @@
-#ifndef __BLINK_STATS__
-#define __BLINK_STATS__
+#ifndef __BLINK_STATS_H__
+#define __BLINK_STATS_H__
 
 #include <fstream>
 

@@ -132,12 +132,18 @@ void getAffineForPoints(std::vector<cv::Point2f> &points1,
 
 void drawFaceBox(cv::Mat frame, std::vector<cv::Point2f> faceBox)
 {
-  std::vector<cv::Point2i> faceBoxInt = std::vector<cv::Point2i>();
+	std::vector<cv::Point2i> faceBoxInt = std::vector<cv::Point2i>();
+	/*std::vector<cv::Point2i> rightEye = std::vector<cv::Point2i>();
+	std::vector<cv::Point2i> leftEye = std::vector<cv::Point2i>();*/
+	//bool rEye = false, lEye = false;
+	
+	for (int i=0; i< faceBox.size(); i++) {
+		faceBoxInt.push_back(cv::Point2i(faceBox[i]));    // Verified that rounding of values is being done here.
 
-  for (int i=0; i< faceBox.size(); i++)
-    faceBoxInt.push_back(cv::Point2i(faceBox[i]));    // Verified that rounding of values is being done here.
-
-  cv::polylines(frame, faceBoxInt, true, cv::Scalar(255,0,255),2);
+	}
+	cv::polylines(frame, faceBoxInt, true, cv::Scalar(255,0,255),2);
+//	if (rEye) cv::polylines(frame, rightEye, true, cv::Scalar(0,255,0),2);
+	//if (lEye) cv::polylines(frame, leftEye, true, cv::Scalar(0,255,0),2);
 }
 
 cv::Rect findFaceBox(cv::Mat frame, cv::Rect origSizeFaceBox, bool &outBoolForceReinit,

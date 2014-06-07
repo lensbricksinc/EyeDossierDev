@@ -138,7 +138,7 @@ cv::Mat BlinkDetector::extractWarpedFace(cv::Mat frameRGB, bool &flagNewFace)
             {
                 //cv::imshow( "Frames", frameOut(faceBoxSection) );
                 retMat = frameOut(faceBoxSection).clone();      // clone is required since we would draw a pink box in the original frame.
-
+				//cv::resize(retMat, retMat, cv::Size(80,80));
                 //cv::imshow("Face Region",retMat);
                 //cv::waitKey(1);
 
@@ -170,7 +170,8 @@ cv::Mat BlinkDetector::extractWarpedFace(cv::Mat frameRGB, bool &flagNewFace)
 
     }
 
-    if (!faceBoxLockedKLT && ((mFrameNum & 0x03) == 0x00))		// Do face detection every fourth frame.
+
+    if (!faceBoxLockedKLT)
     {
         std::vector<cv::Rect> faces;
         cv::Rect currFaceFromFD;
@@ -192,8 +193,7 @@ cv::Mat BlinkDetector::extractWarpedFace(cv::Mat frameRGB, bool &flagNewFace)
 
         if (currFaceFromFD.width >0)
         {
-            // Potential candidate for KLT based tracking.
-            // Find number of features. If it is greater than 4, move on to tracking from FD
+
             getFeaturePoints2(frame_gray, prevFeaturePoints, currFaceFromFD);
 
             /*
@@ -216,6 +216,7 @@ cv::Mat BlinkDetector::extractWarpedFace(cv::Mat frameRGB, bool &flagNewFace)
                 framesInKLTLoop = 0;
                 affInvCumulative = cv::Mat::eye(cv::Size(3,3), CV_32F);
                 retMat = frameRGB(faceBoxFromFD);         // Actually no need for this delay
+				//cv::resize(retMat, retMat, cv::Size(80,80));
             }
 
             if (faceBoxLockedKLT)
@@ -225,7 +226,7 @@ cv::Mat BlinkDetector::extractWarpedFace(cv::Mat frameRGB, bool &flagNewFace)
                 pointsFaceBoxTransformed.push_back(cv::Point2f((int)(currFaceFromFD.x + currFaceFromFD.width - 1), (int)currFaceFromFD.y));
                 pointsFaceBoxTransformed.push_back(cv::Point2f((int)(currFaceFromFD.x + currFaceFromFD.width - 1), (int)(currFaceFromFD.y + currFaceFromFD.height - 1)));
                 pointsFaceBoxTransformed.push_back(cv::Point2f((int)currFaceFromFD.x, (int)(currFaceFromFD.y + currFaceFromFD.height - 1)));
-            
+
                 //cv::polylines(frame, pointsFaceBox, true, cv::Scalar(255,0,255),3);
                 drawFaceBox(frameRGB, pointsFaceBoxTransformed);
             }

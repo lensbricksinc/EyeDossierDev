@@ -40,6 +40,30 @@
     <ClCompile Include="getAffineForPoints.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="blink_detection_ml.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ml_core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HOGcompute.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HOGvisualize.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="classify.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="svm-predict.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="svm-scale.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="svm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="blink_detector.h">
@@ -72,6 +96,15 @@
     <ClInclude Include="getAffineForPoints.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ml_core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="params.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="svm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Xml Include="cascades\haarcascade_frontalface_alt.xml">
@@ -100,5 +133,10 @@
     <Filter Include="Source Files">
       <UniqueIdentifier>{cc0c66d2-f9da-4aa7-ba25-e186bcea85e9}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="svm.def">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
